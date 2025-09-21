@@ -273,26 +273,6 @@ const LandingPage = () => {
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
             Join the revolution in campus placement management. Experience the power of intelligent matching today.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              variant="hero" 
-              size="lg"
-              onClick={() => navigate('/student')}
-              className="bg-white text-campus-primary hover:bg-white/90"
-            >
-              <Users className="w-5 h-5" />
-              Explore Student Portal
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              onClick={() => navigate('/tpo')}
-              className="border-white text-white hover:bg-white hover:text-campus-primary"
-            >
-              <Target className="w-5 h-5" />
-              Discover TPO Portal
-            </Button>
-          </div>
         </div>
       </section>
 
