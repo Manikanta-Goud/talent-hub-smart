@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import heroCampus from "@/assets/hero-campus.jpg";
 import aiMatching from "@/assets/ai-matching.jpg";
 import analyticsDashboard from "@/assets/analytics-dashboard.jpg";
+import roleBasedPortals from "@/assets/role-based-portals.jpg";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const LandingPage = () => {
       icon: Users,
       title: "Role-Based Portals",
       description: "Dedicated interfaces for students, TPOs, mentors, and employers with tailored experiences.",
+      image: "https://y7b6t9n6.delivery.rocketcdn.me/wp-content/uploads/2024/02/4-TOP-10-eLearning-Websites-1024x587.png.webp",
       color: "bg-campus-primary"
     },
     {
@@ -56,34 +58,6 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <header className="border-b bg-campus-surface-elevated/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-foreground">Campus-Connect</span>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/student')}
-              className="border-campus-primary text-campus-primary hover:bg-campus-primary hover:text-white"
-            >
-              Student Portal
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/tpo')}
-              className="border-campus-secondary text-campus-secondary hover:bg-campus-secondary hover:text-white"
-            >
-              TPO Portal
-            </Button>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -95,14 +69,20 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-gradient-primary opacity-10"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-foreground">Campus-Connect</h1>
+          </div>
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-6 bg-campus-primary text-white" variant="secondary">
               Smart India Hackathon 2024
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
               Revolutionizing Campus
               <span className="bg-gradient-primary bg-clip-text text-transparent"> Placements</span>
-            </h1>
+            </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               From scattered WhatsApp messages to intelligent career connections. 
               Campus-Connect transforms how technical colleges manage internships and placements.
