@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Users, BarChart3, Zap, Target, Sparkles } from "lucide-react";
+import { Brain, Users, BarChart3, Zap, Target, Sparkles, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import heroCampus from "@/assets/hero-campus.jpg";
 import aiMatching from "@/assets/ai-matching.jpg";
 import analyticsDashboard from "@/assets/analytics-dashboard.jpg";
@@ -10,6 +13,24 @@ import roleBasedPortals from "@/assets/role-based-portals.jpg";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { user, userProfile, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
+  const getUserInitials = () => {
+    if (userProfile?.full_name) {
+      return userProfile.full_name
+        .split(' ')
+        .map(name => name[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user?.email?.[0]?.toUpperCase() || 'U';
+  };
 
   const features = [
     {
@@ -58,6 +79,55 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
+      {/* Navigation Header */}
+      <nav className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-foreground">Campus-Connect</h1>
+          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={userProfile?.resume_url} alt={userProfile?.full_name} />
+                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {userProfile?.full_name || 'User'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/student')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Student Portal</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/tpo')}>
+                <Target className="mr-2 h-4 w-4" />
+                <span>TPO Portal</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -69,23 +139,19 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-gradient-primary opacity-10"></div>
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-4xl font-bold text-foreground">Campus-Connect</h1>
-          </div>
           <div className="max-w-4xl mx-auto text-center">
             <Badge className="mb-6 bg-campus-primary text-white" variant="secondary">
               Smart India Hackathon 2024
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-              Revolutionizing Campus
-              <span className="bg-gradient-primary bg-clip-text text-transparent"> Placements</span>
+              Welcome back, 
+              <span className="bg-gradient-primary bg-clip-text text-transparent"> {userProfile?.full_name?.split(' ')[0] || 'Student'}</span>
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              From scattered WhatsApp messages to intelligent career connections. 
-              Campus-Connect transforms how technical colleges manage internships and placements.
+              {userProfile ? 
+                `Ready to explore new opportunities? Access your personalized dashboard and discover internships tailored for ${userProfile.course} students.` :
+                'Access your personalized dashboard and discover new opportunities tailored just for you.'
+              }
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -110,6 +176,86 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      {/* User Profile Section */}
+      {userProfile && (
+        <section className="py-16 bg-campus-surface-elevated">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold mb-8 text-center text-foreground">Your Profile</h2>
+              <Card className="mb-8 overflow-hidden">
+                <CardHeader className="bg-muted/30 border-b">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16 border">
+                      <AvatarImage src={userProfile.resume_url} alt={userProfile.full_name} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="text-2xl font-bold">{userProfile.full_name}</h3>
+                      <p className="text-muted-foreground">{userProfile.course} • {userProfile.university}</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">Email Address</p>
+                      <p className="font-semibold">{userProfile.email}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">Phone Number</p>
+                      <p className="font-semibold">{userProfile.phone_number || 'Not provided'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">Student ID</p>
+                      <p className="font-semibold">{userProfile.student_id || 'Not provided'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">Graduation Year</p>
+                      <p className="font-semibold">{userProfile.graduation_year}</p>
+                    </div>
+                  </div>
+
+                  {userProfile.skills && userProfile.skills.length > 0 && (
+                    <div className="mt-6">
+                      <p className="text-sm font-medium text-muted-foreground mb-2">Skills</p>
+                      <div className="flex flex-wrap gap-2">
+                        {userProfile.skills.map((skill, index) => (
+                          <Badge key={index} variant="secondary">{skill}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    {userProfile.linkedin_url && (
+                      <Button variant="outline" asChild>
+                        <a href={userProfile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                          <Users className="mr-2 h-4 w-4" /> LinkedIn
+                        </a>
+                      </Button>
+                    )}
+                    {userProfile.github_url && (
+                      <Button variant="outline" asChild>
+                        <a href={userProfile.github_url} target="_blank" rel="noopener noreferrer">
+                          <Brain className="mr-2 h-4 w-4" /> GitHub
+                        </a>
+                      </Button>
+                    )}
+                    {userProfile.portfolio_url && (
+                      <Button variant="outline" asChild>
+                        <a href={userProfile.portfolio_url} target="_blank" rel="noopener noreferrer">
+                          <Zap className="mr-2 h-4 w-4" /> Portfolio
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Problem Statement */}
       <section className="py-16 bg-campus-surface-elevated">
