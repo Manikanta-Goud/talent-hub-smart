@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import StudentProfileView from "@/components/StudentProfileView";
 import { 
   Settings, 
   Plus, 
@@ -38,6 +39,7 @@ const TPOPortal = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAddingOpportunity, setIsAddingOpportunity] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const opportunities = [
     {
@@ -90,12 +92,19 @@ const TPOPortal = () => {
       name: "Alex Johnson",
       email: "alex.johnson@college.edu",
       year: "3rd Year",
-      branch: "Computer Science",
+      branch: "Computer Science Engineering",
       cgpa: "8.5",
       applications: 5,
       interviews: 3,
       offers: 1,
-      skills: ["React", "Node.js", "Python", "Machine Learning"]
+      skills: ["React", "Node.js", "Python", "Machine Learning", "JavaScript", "MongoDB"],
+      phone_number: "+91 9876543210",
+      student_id: "CS21B1001",
+      university: "Indian Institute of Technology",
+      graduation_year: "2025",
+      linkedin_url: "https://linkedin.com/in/alexjohnson",
+      github_url: "https://github.com/alexjohnson",
+      portfolio_url: "https://alexjohnson.dev"
     },
     {
       id: 2,
@@ -107,19 +116,33 @@ const TPOPortal = () => {
       applications: 8,
       interviews: 6,
       offers: 2,
-      skills: ["Java", "Spring Boot", "AWS", "Docker"]
+      skills: ["Java", "Spring Boot", "AWS", "Docker", "Kubernetes", "Microservices"],
+      phone_number: "+91 9876543211",
+      student_id: "IT20B1025",
+      university: "Indian Institute of Technology",
+      graduation_year: "2024",
+      linkedin_url: "https://linkedin.com/in/priyasharma",
+      github_url: "https://github.com/priyasharma",
+      portfolio_url: null
     },
     {
       id: 3,
       name: "Rahul Verma",
       email: "rahul.verma@college.edu",
       year: "3rd Year",
-      branch: "Electronics",
+      branch: "Electronics and Communication Engineering",
       cgpa: "8.2",
       applications: 3,
       interviews: 1,
       offers: 0,
-      skills: ["Python", "TensorFlow", "OpenCV", "Arduino"]
+      skills: ["Python", "TensorFlow", "OpenCV", "Arduino", "MATLAB", "Embedded Systems"],
+      phone_number: "+91 9876543212",
+      student_id: "EC21B1055",
+      university: "Indian Institute of Technology",
+      graduation_year: "2025",
+      linkedin_url: "https://linkedin.com/in/rahulverma",
+      github_url: null,
+      portfolio_url: null
     }
   ];
 
@@ -155,6 +178,10 @@ const TPOPortal = () => {
       description: "The opportunity has been removed from the platform.",
       variant: "destructive"
     });
+  };
+
+  const handleViewStudentProfile = (student: any) => {
+    setSelectedStudent(student);
   };
 
   return (
@@ -525,7 +552,11 @@ const TPOPortal = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="flex gap-3">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewStudentProfile(student)}
+                        >
                           <FileText className="w-4 h-4 mr-2" />
                           View Profile
                         </Button>
@@ -592,6 +623,14 @@ const TPOPortal = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Student Profile Modal */}
+      {selectedStudent && (
+        <StudentProfileView 
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   );
 };

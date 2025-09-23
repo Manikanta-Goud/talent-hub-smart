@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -24,8 +23,7 @@ import {
   Sparkles,
   Target,
   FileText,
-  Calendar,
-  Award
+  Calendar
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -34,21 +32,9 @@ const StudentPortal = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [profile, setProfile] = useState({
-    name: "Alex Johnson",
-    email: "alex.johnson@college.edu",
-    year: "3rd Year",
-    branch: "Computer Science",
-    cgpa: "8.5",
-    skills: ["React", "Node.js", "Python", "Machine Learning", "Data Science"],
-    projects: [
-      {
-        title: "AI-Powered Chatbot",
-        description: "Built a conversational AI using NLP techniques",
-        tech: ["Python", "TensorFlow", "Flask"]
-      }
-    ]
-  });
+
+  // Sample user name for header - this could come from auth context
+  const userName = "Alex Johnson";
 
   const opportunities = [
     {
@@ -175,7 +161,7 @@ const StudentPortal = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-foreground">Student Portal</h1>
-                  <p className="text-sm text-muted-foreground">Welcome back, {profile.name}</p>
+                  <p className="text-sm text-muted-foreground">Welcome back, {userName}</p>
                 </div>
               </div>
             </div>
@@ -189,7 +175,7 @@ const StudentPortal = () => {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="opportunities" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="opportunities" className="flex items-center gap-2">
               <Search className="w-4 h-4" />
               Opportunities
@@ -197,10 +183,6 @@ const StudentPortal = () => {
             <TabsTrigger value="applications" className="flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
               My Applications
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="w-4 h-4" />
-              Profile
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
@@ -359,82 +341,6 @@ const StudentPortal = () => {
                   </Card>
                 ))}
               </div>
-            </div>
-          </TabsContent>
-
-          {/* Profile Tab */}
-          <TabsContent value="profile">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Student Profile
-                  </CardTitle>
-                  <CardDescription>
-                    Maintain your academic and professional information
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input id="name" value={profile.name} readOnly />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" value={profile.email} readOnly />
-                    </div>
-                    <div>
-                      <Label htmlFor="year">Academic Year</Label>
-                      <Input id="year" value={profile.year} readOnly />
-                    </div>
-                    <div>
-                      <Label htmlFor="branch">Branch</Label>
-                      <Input id="branch" value={profile.branch} readOnly />
-                    </div>
-                    <div>
-                      <Label htmlFor="cgpa">CGPA</Label>
-                      <Input id="cgpa" value={profile.cgpa} readOnly />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>Skills</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {profile.skills.map((skill, index) => (
-                        <Badge key={index} variant="secondary">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Projects</Label>
-                    <div className="space-y-3 mt-2">
-                      {profile.projects.map((project, index) => (
-                        <Card key={index} className="p-4">
-                          <h4 className="font-semibold">{project.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
-                          <div className="flex flex-wrap gap-1">
-                            {project.tech.map((tech, techIndex) => (
-                              <Badge key={techIndex} variant="outline" className="text-xs">
-                                {tech}
-                              </Badge>
-                            ))}
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Button variant="student">
-                    <Award className="w-4 h-4 mr-2" />
-                    Update Profile
-                  </Button>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 

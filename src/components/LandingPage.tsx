@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Users, BarChart3, Zap, Target, Sparkles, LogOut, User } from "lucide-react";
+import { Brain, Users, BarChart3, Zap, Target, Sparkles, LogOut, User, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -89,42 +89,102 @@ const LandingPage = () => {
             <h1 className="text-xl font-bold text-foreground">Campus-Connect</h1>
           </div>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={userProfile?.resume_url} alt={userProfile?.full_name} />
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {userProfile?.full_name || 'User'}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
+          <div className="flex items-center gap-2">
+            {/* Direct Profile Button */}
+            <Button 
+              variant="ghost" 
+              className="relative h-12 w-12 rounded-full hover:bg-muted/50 transition-all duration-200 ring-2 ring-transparent hover:ring-primary/20 focus:ring-primary/30"
+              onClick={() => navigate('/profile')}
+            >
+              <Avatar className="h-11 w-11 border-2 border-white/20 shadow-md">
+                <AvatarImage 
+                  src={userProfile?.resume_url} 
+                  alt={userProfile?.full_name}
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-gradient-primary text-white font-semibold text-sm">
+                  {getUserInitials()}
+                </AvatarFallback>
+              </Avatar>
+              {/* Online indicator */}
+              <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+            </Button>
+            
+            {/* Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8 rounded-full hover:bg-muted/50 transition-all duration-200"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64 p-2" align="end" sideOffset={8}>
+              <DropdownMenuLabel className="font-normal p-3 bg-muted/30 rounded-lg mb-2">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-10 w-10 border border-border">
+                    <AvatarImage src={userProfile?.resume_url} alt={userProfile?.full_name} />
+                    <AvatarFallback className="bg-gradient-primary text-white text-sm">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {userProfile?.full_name || 'User'}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground truncate">
+                      {user?.email}
+                    </p>
+                  </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/student')}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Student Portal</span>
+              <DropdownMenuSeparator className="my-2" />
+              <DropdownMenuItem 
+                onClick={() => navigate('/profile')}
+                className="p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
+              >
+                <User className="mr-3 h-4 w-4 text-primary" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Profile</span>
+                  <span className="text-xs text-muted-foreground">View and edit your profile</span>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/tpo')}>
-                <Target className="mr-2 h-4 w-4" />
-                <span>TPO Portal</span>
+              <DropdownMenuItem 
+                onClick={() => navigate('/student')}
+                className="p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
+              >
+                <User className="mr-3 h-4 w-4 text-blue-600" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Student Portal</span>
+                  <span className="text-xs text-muted-foreground">Access student features</span>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+              <DropdownMenuItem 
+                onClick={() => navigate('/tpo')}
+                className="p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
+              >
+                <Target className="mr-3 h-4 w-4 text-green-600" />
+                <div className="flex flex-col">
+                  <span className="font-medium">TPO Portal</span>
+                  <span className="text-xs text-muted-foreground">Training & Placement Office</span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-2" />
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="p-3 rounded-lg hover:bg-red-50 cursor-pointer transition-colors text-red-600"
+              >
+                <LogOut className="mr-3 h-4 w-4" />
+                <div className="flex flex-col">
+                  <span className="font-medium">Log out</span>
+                  <span className="text-xs text-muted-foreground">Sign out of your account</span>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
       </nav>
 
@@ -176,86 +236,6 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-
-      {/* User Profile Section */}
-      {userProfile && (
-        <section className="py-16 bg-campus-surface-elevated">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-8 text-center text-foreground">Your Profile</h2>
-              <Card className="mb-8 overflow-hidden">
-                <CardHeader className="bg-muted/30 border-b">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16 border">
-                      <AvatarImage src={userProfile.resume_url} alt={userProfile.full_name} />
-                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="text-2xl font-bold">{userProfile.full_name}</h3>
-                      <p className="text-muted-foreground">{userProfile.course} • {userProfile.university}</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">Email Address</p>
-                      <p className="font-semibold">{userProfile.email}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">Phone Number</p>
-                      <p className="font-semibold">{userProfile.phone_number || 'Not provided'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">Student ID</p>
-                      <p className="font-semibold">{userProfile.student_id || 'Not provided'}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-muted-foreground">Graduation Year</p>
-                      <p className="font-semibold">{userProfile.graduation_year}</p>
-                    </div>
-                  </div>
-
-                  {userProfile.skills && userProfile.skills.length > 0 && (
-                    <div className="mt-6">
-                      <p className="text-sm font-medium text-muted-foreground mb-2">Skills</p>
-                      <div className="flex flex-wrap gap-2">
-                        {userProfile.skills.map((skill, index) => (
-                          <Badge key={index} variant="secondary">{skill}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="mt-8 flex flex-wrap gap-3">
-                    {userProfile.linkedin_url && (
-                      <Button variant="outline" asChild>
-                        <a href={userProfile.linkedin_url} target="_blank" rel="noopener noreferrer">
-                          <Users className="mr-2 h-4 w-4" /> LinkedIn
-                        </a>
-                      </Button>
-                    )}
-                    {userProfile.github_url && (
-                      <Button variant="outline" asChild>
-                        <a href={userProfile.github_url} target="_blank" rel="noopener noreferrer">
-                          <Brain className="mr-2 h-4 w-4" /> GitHub
-                        </a>
-                      </Button>
-                    )}
-                    {userProfile.portfolio_url && (
-                      <Button variant="outline" asChild>
-                        <a href={userProfile.portfolio_url} target="_blank" rel="noopener noreferrer">
-                          <Zap className="mr-2 h-4 w-4" /> Portfolio
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Problem Statement */}
       <section className="py-16 bg-campus-surface-elevated">
