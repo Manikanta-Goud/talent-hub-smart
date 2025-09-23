@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import AIAssistant from "@/components/AIAssistant";
 import heroCampus from "@/assets/hero-campus.jpg";
 import aiMatching from "@/assets/ai-matching.jpg";
 import analyticsDashboard from "@/assets/analytics-dashboard.jpg";
@@ -396,6 +397,9 @@ const LandingPage = () => {
           </p>
         </div>
       </footer>
+
+      {/* AI Assistant */}
+      <AIAssistant />
     </div>
   );
 };

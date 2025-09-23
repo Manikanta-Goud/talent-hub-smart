@@ -40,6 +40,7 @@ const TPOPortal = () => {
   const { toast } = useToast();
   const [isAddingOpportunity, setIsAddingOpportunity] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState("all");
 
   const opportunities = [
     {
@@ -54,7 +55,8 @@ const TPOPortal = () => {
       status: "Active",
       skills: ["React", "Node.js", "JavaScript"],
       posted: "2024-01-01",
-      description: "Join our dynamic team to build cutting-edge web applications."
+      description: "Join our dynamic team to build cutting-edge web applications.",
+      category: "Technology"
     },
     {
       id: 2,
@@ -68,7 +70,8 @@ const TPOPortal = () => {
       status: "Active",
       skills: ["Python", "Machine Learning", "TensorFlow"],
       posted: "2024-01-03",
-      description: "Research and develop innovative ML algorithms."
+      description: "Research and develop innovative ML algorithms.",
+      category: "Research"
     },
     {
       id: 3,
@@ -82,7 +85,188 @@ const TPOPortal = () => {
       status: "Draft",
       skills: ["React", "Vue.js", "CSS"],
       posted: "2024-01-05",
-      description: "Create amazing user experiences in a startup environment."
+      description: "Create amazing user experiences in a startup environment.",
+      category: "Technology"
+    },
+    {
+      id: 4,
+      title: "Smart India Hackathon 2024",
+      company: "Government of India",
+      type: "Hackathon",
+      location: "Multiple Cities",
+      stipend: "₹1,00,000 Prize Pool",
+      deadline: "2024-02-10",
+      applicants: 156,
+      status: "Active",
+      skills: ["Problem Solving", "Innovation", "Team Work", "Presentation"],
+      posted: "2024-01-02",
+      description: "36-hour hackathon to solve real-world problems using technology. Form teams of 6 members.",
+      category: "Competition"
+    },
+    {
+      id: 5,
+      title: "Google Summer of Code",
+      company: "Google",
+      type: "Open Source Program",
+      location: "Remote",
+      stipend: "$3,000 - $6,600",
+      deadline: "2024-04-02",
+      applicants: 89,
+      status: "Active",
+      skills: ["Open Source", "Programming", "Documentation", "Git"],
+      posted: "2024-01-01",
+      description: "Contribute to open source projects mentored by Google. 12-22 week program.",
+      category: "Open Source"
+    },
+    {
+      id: 6,
+      title: "Microsoft Imagine Cup",
+      company: "Microsoft",
+      type: "Global Competition",
+      location: "Global",
+      stipend: "$100,000 Prize",
+      deadline: "2024-03-15",
+      applicants: 234,
+      status: "Active",
+      skills: ["Azure", "AI", "Innovation", "Entrepreneurship"],
+      posted: "2024-01-04",
+      description: "Global technology competition for students to create solutions that matter.",
+      category: "Competition"
+    },
+    {
+      id: 7,
+      title: "Campus Ambassador Program",
+      company: "TechTalks India",
+      type: "Part-time",
+      location: "On-Campus",
+      stipend: "₹5,000/month + Perks",
+      deadline: "2024-02-28",
+      applicants: 67,
+      status: "Active",
+      skills: ["Marketing", "Communication", "Event Management", "Social Media"],
+      posted: "2024-01-06",
+      description: "Represent TechTalks on campus, organize events, and build tech community.",
+      category: "Ambassador"
+    },
+    {
+      id: 8,
+      title: "Data Science Internship",
+      company: "Analytics Pro",
+      type: "Internship",
+      location: "Chennai",
+      stipend: "₹28,000/month",
+      deadline: "2024-02-05",
+      applicants: 41,
+      status: "Active",
+      skills: ["Python", "R", "SQL", "Data Visualization", "Statistics"],
+      posted: "2024-01-07",
+      description: "Work on real-world data science projects with experienced mentors.",
+      category: "Data Science"
+    },
+    {
+      id: 9,
+      title: "ACM-ICPC Programming Contest",
+      company: "ACM India",
+      type: "Programming Contest",
+      location: "Multiple Venues",
+      stipend: "Certificates + Prizes",
+      deadline: "2024-02-20",
+      applicants: 178,
+      status: "Active",
+      skills: ["Algorithms", "Data Structures", "C++", "Problem Solving"],
+      posted: "2024-01-08",
+      description: "International collegiate programming contest. Team registration required.",
+      category: "Competition"
+    },
+    {
+      id: 10,
+      title: "Cybersecurity Research Intern",
+      company: "SecureNet Labs",
+      type: "Internship",
+      location: "Pune",
+      stipend: "₹32,000/month",
+      deadline: "2024-02-12",
+      applicants: 29,
+      status: "Active",
+      skills: ["Cybersecurity", "Ethical Hacking", "Network Security", "Python"],
+      posted: "2024-01-09",
+      description: "Research emerging cyber threats and develop security solutions.",
+      category: "Security"
+    },
+    {
+      id: 11,
+      title: "Placement Cell Student Coordinator",
+      company: "College Placement Cell",
+      type: "Student Position",
+      location: "On-Campus",
+      stipend: "Certificate + Experience",
+      deadline: "2024-01-30",
+      applicants: 23,
+      status: "Active",
+      skills: ["Leadership", "Communication", "Organization", "Database Management"],
+      posted: "2024-01-10",
+      description: "Assist placement cell in coordinating recruitment drives and student activities.",
+      category: "Campus Role"
+    },
+    {
+      id: 12,
+      title: "NASA Space Apps Challenge",
+      company: "NASA",
+      type: "Global Hackathon",
+      location: "Worldwide",
+      stipend: "Global Recognition",
+      deadline: "2024-03-01",
+      applicants: 312,
+      status: "Active",
+      skills: ["Space Technology", "Data Analysis", "Innovation", "Teamwork"],
+      posted: "2024-01-11",
+      description: "48-hour hackathon to solve challenges related to space exploration and Earth science.",
+      category: "Space Tech"
+    },
+    {
+      id: 13,
+      title: "Blockchain Developer Intern",
+      company: "CryptoTech Solutions",
+      type: "Internship",
+      location: "Delhi",
+      stipend: "₹35,000/month",
+      deadline: "2024-02-18",
+      applicants: 38,
+      status: "Active",
+      skills: ["Blockchain", "Solidity", "Web3", "Smart Contracts", "JavaScript"],
+      posted: "2024-01-12",
+      description: "Develop decentralized applications and smart contracts on blockchain platforms.",
+      category: "Blockchain"
+    },
+    {
+      id: 14,
+      title: "TechFest Innovation Challenge",
+      company: "IIT Bombay",
+      type: "Innovation Contest",
+      location: "Mumbai",
+      stipend: "₹2,00,000 Prize Pool",
+      deadline: "2024-02-25",
+      applicants: 145,
+      status: "Active",
+      skills: ["Innovation", "Technology", "Presentation", "Business Model"],
+      posted: "2024-01-13",
+      description: "Showcase innovative technology solutions and compete for cash prizes and mentorship.",
+      category: "Innovation"
+    },
+    {
+      id: 15,
+      title: "Content Creator Internship",
+      company: "EduTech Media",
+      type: "Internship",
+      location: "Remote",
+      stipend: "₹20,000/month",
+      deadline: "2024-02-08",
+      applicants: 52,
+      status: "Active",
+      skills: ["Content Writing", "Video Editing", "Social Media", "SEO"],
+      posted: "2024-01-14",
+      description: "Create engaging educational content for online platforms and social media.",
+      category: "Content & Media"
     }
   ];
 
@@ -143,16 +327,195 @@ const TPOPortal = () => {
       linkedin_url: "https://linkedin.com/in/rahulverma",
       github_url: null,
       portfolio_url: null
+    },
+    {
+      id: 4,
+      name: "Ananya Patel",
+      email: "ananya.patel@college.edu",
+      year: "2nd Year",
+      branch: "Computer Science Engineering",
+      cgpa: "9.3",
+      applications: 12,
+      interviews: 8,
+      offers: 3,
+      skills: ["React", "TypeScript", "GraphQL", "MongoDB", "UI/UX Design", "Figma"],
+      phone_number: "+91 9876543213",
+      student_id: "CS22B1089",
+      university: "Indian Institute of Technology",
+      graduation_year: "2026",
+      linkedin_url: "https://linkedin.com/in/ananyapatel",
+      github_url: "https://github.com/ananyapatel",
+      portfolio_url: "https://ananyapatel.design"
+    },
+    {
+      id: 5,
+      name: "Arjun Singh",
+      email: "arjun.singh@college.edu",
+      year: "4th Year",
+      branch: "Mechanical Engineering",
+      cgpa: "8.7",
+      applications: 6,
+      interviews: 4,
+      offers: 2,
+      skills: ["CAD Design", "SolidWorks", "MATLAB", "Python", "Manufacturing", "IoT"],
+      phone_number: "+91 9876543214",
+      student_id: "ME20B1044",
+      university: "Indian Institute of Technology",
+      graduation_year: "2024",
+      linkedin_url: "https://linkedin.com/in/arjunsingh",
+      github_url: "https://github.com/arjunsingh",
+      portfolio_url: null
+    },
+    {
+      id: 6,
+      name: "Sneha Reddy",
+      email: "sneha.reddy@college.edu",
+      year: "3rd Year",
+      branch: "Data Science",
+      cgpa: "9.0",
+      applications: 10,
+      interviews: 7,
+      offers: 4,
+      skills: ["Python", "R", "Machine Learning", "Deep Learning", "SQL", "Tableau"],
+      phone_number: "+91 9876543215",
+      student_id: "DS21B1067",
+      university: "Indian Institute of Technology",
+      graduation_year: "2025",
+      linkedin_url: "https://linkedin.com/in/snehareddy",
+      github_url: "https://github.com/snehareddy",
+      portfolio_url: "https://snehareddy.datascience.io"
+    },
+    {
+      id: 7,
+      name: "Karthik Nair",
+      email: "karthik.nair@college.edu",
+      year: "3rd Year",
+      branch: "Cybersecurity",
+      cgpa: "8.8",
+      applications: 7,
+      interviews: 5,
+      offers: 2,
+      skills: ["Ethical Hacking", "Network Security", "Python", "Cryptography", "Forensics", "Penetration Testing"],
+      phone_number: "+91 9876543216",
+      student_id: "CY21B1033",
+      university: "Indian Institute of Technology",
+      graduation_year: "2025",
+      linkedin_url: "https://linkedin.com/in/karthiknair",
+      github_url: "https://github.com/karthiknair",
+      portfolio_url: null
+    },
+    {
+      id: 8,
+      name: "Meera Gupta",
+      email: "meera.gupta@college.edu",
+      year: "2nd Year",
+      branch: "Artificial Intelligence",
+      cgpa: "9.2",
+      applications: 9,
+      interviews: 6,
+      offers: 3,
+      skills: ["Machine Learning", "Deep Learning", "NLP", "Computer Vision", "TensorFlow", "PyTorch"],
+      phone_number: "+91 9876543217",
+      student_id: "AI22B1078",
+      university: "Indian Institute of Technology",
+      graduation_year: "2026",
+      linkedin_url: "https://linkedin.com/in/meeragupta",
+      github_url: "https://github.com/meeragupta",
+      portfolio_url: "https://meeragupta.ai"
+    },
+    {
+      id: 9,
+      name: "Vikram Kumar",
+      email: "vikram.kumar@college.edu",
+      year: "4th Year",
+      branch: "Blockchain Technology",
+      cgpa: "8.6",
+      applications: 5,
+      interviews: 3,
+      offers: 1,
+      skills: ["Solidity", "Web3", "Smart Contracts", "Ethereum", "DeFi", "JavaScript"],
+      phone_number: "+91 9876543218",
+      student_id: "BT20B1091",
+      university: "Indian Institute of Technology",
+      graduation_year: "2024",
+      linkedin_url: "https://linkedin.com/in/vikramkumar",
+      github_url: "https://github.com/vikramkumar",
+      portfolio_url: "https://vikramkumar.blockchain.dev"
+    },
+    {
+      id: 10,
+      name: "Divya Joshi",
+      email: "divya.joshi@college.edu",
+      year: "3rd Year",
+      branch: "Robotics Engineering",
+      cgpa: "8.9",
+      applications: 8,
+      interviews: 5,
+      offers: 2,
+      skills: ["ROS", "Python", "C++", "Computer Vision", "Control Systems", "Arduino"],
+      phone_number: "+91 9876543219",
+      student_id: "RO21B1054",
+      university: "Indian Institute of Technology",
+      graduation_year: "2025",
+      linkedin_url: "https://linkedin.com/in/divyajoshi",
+      github_url: "https://github.com/divyajoshi",
+      portfolio_url: null
+    },
+    {
+      id: 11,
+      name: "Rohit Agarwal",
+      email: "rohit.agarwal@college.edu",
+      year: "2nd Year",
+      branch: "Game Development",
+      cgpa: "8.4",
+      applications: 4,
+      interviews: 2,
+      offers: 1,
+      skills: ["Unity", "C#", "3D Modeling", "Game Design", "Blender", "JavaScript"],
+      phone_number: "+91 9876543220",
+      student_id: "GD22B1023",
+      university: "Indian Institute of Technology",
+      graduation_year: "2026",
+      linkedin_url: "https://linkedin.com/in/rohitagarwal",
+      github_url: "https://github.com/rohitagarwal",
+      portfolio_url: "https://rohitagarwal.gamedev.io"
+    },
+    {
+      id: 12,
+      name: "Pooja Desai",
+      email: "pooja.desai@college.edu",
+      year: "4th Year",
+      branch: "Digital Marketing",
+      cgpa: "8.3",
+      applications: 11,
+      interviews: 9,
+      offers: 5,
+      skills: ["SEO", "Social Media Marketing", "Content Creation", "Analytics", "Adobe Creative Suite", "Photography"],
+      phone_number: "+91 9876543221",
+      student_id: "DM20B1087",
+      university: "Indian Institute of Technology",
+      graduation_year: "2024",
+      linkedin_url: "https://linkedin.com/in/poojadesai",
+      github_url: null,
+      portfolio_url: "https://poojadesai.marketing"
     }
   ];
 
   const analyticsData = {
-    totalApplications: 156,
-    totalInterviews: 89,
-    totalOffers: 34,
-    placementRate: 78,
-    avgSalary: "6.8 LPA",
-    topSkills: ["React", "Python", "Java", "Machine Learning", "Node.js"]
+    totalApplications: 1847,
+    totalInterviews: 289,
+    totalOffers: 139,
+    placementRate: 87,
+    avgSalary: "7.8 LPA",
+    topSkills: ["React", "Python", "Java", "Machine Learning", "Node.js"],
+    opportunityTypes: {
+      "Internships": 8,
+      "Full-time Jobs": 3,
+      "Hackathons": 4,
+      "Competitions": 3,
+      "Open Source": 1,
+      "Campus Roles": 2
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -182,6 +545,55 @@ const TPOPortal = () => {
 
   const handleViewStudentProfile = (student: any) => {
     setSelectedStudent(student);
+  };
+
+  const getFilteredOpportunities = () => {
+    if (selectedFilter === "all") return opportunities;
+    
+    const filterMap: { [key: string]: string[] } = {
+      "internships": ["Internship"],
+      "hackathons": ["Hackathon", "Global Hackathon"],
+      "competitions": ["Programming Contest", "Global Competition", "Innovation Contest"],
+      "open-source": ["Open Source Program"],
+      "campus-roles": ["Student Position", "Part-time"],
+      "research": ["Internship"] // Filter research-related internships by company/description
+    };
+
+    const allowedTypes = filterMap[selectedFilter] || [];
+    
+    if (selectedFilter === "research") {
+      return opportunities.filter(opp => 
+        opp.title.toLowerCase().includes("research") || 
+        opp.company.toLowerCase().includes("labs") ||
+        opp.description.toLowerCase().includes("research")
+      );
+    }
+    
+    return opportunities.filter(opp => allowedTypes.includes(opp.type));
+  };
+
+  const getFilterCount = (filterType: string) => {
+    if (filterType === "all") return opportunities.length;
+    
+    const filterMap: { [key: string]: string[] } = {
+      "internships": ["Internship"],
+      "hackathons": ["Hackathon", "Global Hackathon"],
+      "competitions": ["Programming Contest", "Global Competition", "Innovation Contest"],
+      "open-source": ["Open Source Program"],
+      "campus-roles": ["Student Position", "Part-time"],
+      "research": []
+    };
+
+    if (filterType === "research") {
+      return opportunities.filter(opp => 
+        opp.title.toLowerCase().includes("research") || 
+        opp.company.toLowerCase().includes("labs") ||
+        opp.description.toLowerCase().includes("research")
+      ).length;
+    }
+
+    const allowedTypes = filterMap[filterType] || [];
+    return opportunities.filter(opp => allowedTypes.includes(opp.type)).length;
   };
 
   return (
@@ -296,7 +708,7 @@ const TPOPortal = () => {
                 </Card>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Recent Activity</CardTitle>
@@ -305,8 +717,8 @@ const TPOPortal = () => {
                     <div className="flex items-center gap-3">
                       <CheckCircle className="w-4 h-4 text-success" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">New application received</p>
-                        <p className="text-xs text-muted-foreground">Alex Johnson applied to TechCorp Solutions</p>
+                        <p className="text-sm font-medium">New hackathon registration</p>
+                        <p className="text-xs text-muted-foreground">Alex Johnson registered for Smart India Hackathon</p>
                       </div>
                       <span className="text-xs text-muted-foreground">2m ago</span>
                     </div>
@@ -321,10 +733,42 @@ const TPOPortal = () => {
                     <div className="flex items-center gap-3">
                       <Star className="w-4 h-4 text-warning" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Offer received</p>
-                        <p className="text-xs text-muted-foreground">Rahul Verma got offer from StartupHub</p>
+                        <p className="text-sm font-medium">Competition winner</p>
+                        <p className="text-xs text-muted-foreground">Team won TechFest Innovation Challenge</p>
                       </div>
                       <span className="text-xs text-muted-foreground">1h ago</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="w-4 h-4 text-success" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">New opportunity posted</p>
+                        <p className="text-xs text-muted-foreground">Blockchain Developer Intern at CryptoTech</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">2h ago</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Opportunity Types</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {Object.entries(analyticsData.opportunityTypes).map(([type, count], index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <span className="text-sm">{type}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 bg-muted rounded-full h-2">
+                              <div 
+                                className="bg-campus-primary h-2 rounded-full" 
+                                style={{ width: `${(count / 15) * 100}%` }}
+                              ></div>
+                            </div>
+                            <Badge variant="secondary">{count}</Badge>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -354,7 +798,7 @@ const TPOPortal = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-2xl font-bold">Manage Opportunities</h2>
-                  <p className="text-muted-foreground">Post and manage internship and job opportunities</p>
+                  <p className="text-muted-foreground">Post and manage internships, hackathons, competitions, and job opportunities</p>
                 </div>
                 <Button 
                   variant="tpo" 
@@ -364,6 +808,68 @@ const TPOPortal = () => {
                   Add Opportunity
                 </Button>
               </div>
+
+              {/* Filter Section */}
+              <Card className="p-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    variant={selectedFilter === "all" ? "default" : "outline"} 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => setSelectedFilter("all")}
+                  >
+                    All ({getFilterCount("all")})
+                  </Button>
+                  <Button 
+                    variant={selectedFilter === "internships" ? "default" : "outline"} 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => setSelectedFilter("internships")}
+                  >
+                    Internships ({getFilterCount("internships")})
+                  </Button>
+                  <Button 
+                    variant={selectedFilter === "hackathons" ? "default" : "outline"} 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => setSelectedFilter("hackathons")}
+                  >
+                    Hackathons ({getFilterCount("hackathons")})
+                  </Button>
+                  <Button 
+                    variant={selectedFilter === "competitions" ? "default" : "outline"} 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => setSelectedFilter("competitions")}
+                  >
+                    Competitions ({getFilterCount("competitions")})
+                  </Button>
+                  <Button 
+                    variant={selectedFilter === "open-source" ? "default" : "outline"} 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => setSelectedFilter("open-source")}
+                  >
+                    Open Source ({getFilterCount("open-source")})
+                  </Button>
+                  <Button 
+                    variant={selectedFilter === "campus-roles" ? "default" : "outline"} 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => setSelectedFilter("campus-roles")}
+                  >
+                    Campus Roles ({getFilterCount("campus-roles")})
+                  </Button>
+                  <Button 
+                    variant={selectedFilter === "research" ? "default" : "outline"} 
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => setSelectedFilter("research")}
+                  >
+                    Research ({getFilterCount("research")})
+                  </Button>
+                </div>
+              </Card>
 
               {isAddingOpportunity && (
                 <Card>
@@ -389,8 +895,36 @@ const TPOPortal = () => {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="internship">Internship</SelectItem>
-                            <SelectItem value="full-time">Full-time</SelectItem>
-                            <SelectItem value="part-time">Part-time</SelectItem>
+                            <SelectItem value="full-time">Full-time Job</SelectItem>
+                            <SelectItem value="part-time">Part-time Job</SelectItem>
+                            <SelectItem value="hackathon">Hackathon</SelectItem>
+                            <SelectItem value="competition">Competition</SelectItem>
+                            <SelectItem value="open-source">Open Source Program</SelectItem>
+                            <SelectItem value="ambassador">Campus Ambassador</SelectItem>
+                            <SelectItem value="student-position">Student Position</SelectItem>
+                            <SelectItem value="research">Research Program</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="category">Category</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="technology">Technology</SelectItem>
+                            <SelectItem value="research">Research</SelectItem>
+                            <SelectItem value="competition">Competition</SelectItem>
+                            <SelectItem value="open-source">Open Source</SelectItem>
+                            <SelectItem value="data-science">Data Science</SelectItem>
+                            <SelectItem value="security">Security</SelectItem>
+                            <SelectItem value="blockchain">Blockchain</SelectItem>
+                            <SelectItem value="space-tech">Space Tech</SelectItem>
+                            <SelectItem value="innovation">Innovation</SelectItem>
+                            <SelectItem value="content-media">Content & Media</SelectItem>
+                            <SelectItem value="campus-role">Campus Role</SelectItem>
+                            <SelectItem value="ambassador">Ambassador</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -429,7 +963,16 @@ const TPOPortal = () => {
               )}
 
               <div className="grid gap-4">
-                {opportunities.map((opportunity) => (
+                {getFilteredOpportunities().length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <div className="text-muted-foreground">
+                      <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">No opportunities found</p>
+                      <p className="text-sm">Try selecting a different filter or add new opportunities.</p>
+                    </div>
+                  </Card>
+                ) : (
+                  getFilteredOpportunities().map((opportunity) => (
                   <Card key={opportunity.id} className="hover:shadow-medium transition-spring">
                     <CardHeader>
                       <div className="flex justify-between items-start">
@@ -438,6 +981,9 @@ const TPOPortal = () => {
                             <CardTitle className="text-xl">{opportunity.title}</CardTitle>
                             <Badge className={getStatusColor(opportunity.status)}>
                               {opportunity.status}
+                            </Badge>
+                            <Badge variant="outline" className="bg-campus-primary/10 text-campus-primary border-campus-primary">
+                              {opportunity.category}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-4 text-muted-foreground mb-3">
@@ -488,7 +1034,8 @@ const TPOPortal = () => {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                ))
+                )}
               </div>
             </div>
           </TabsContent>
