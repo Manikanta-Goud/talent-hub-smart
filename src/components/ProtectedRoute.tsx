@@ -5,10 +5,11 @@ import { Loader2 } from 'lucide-react'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
+  allowedRoles?: string[]
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth()
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+  const { user, userProfile, loading } = useAuth()
   const location = useLocation()
 
   if (loading) {
@@ -25,6 +26,18 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   if (!user) {
     // Redirect to login page with return url
     return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  // Check role-based access if allowedRoles is specified
+  if (allowedRoles && userProfile?.role) {
+    if (!allowedRoles.includes(userProfile.role)) {
+      // Redirect TPO users who try to access student/employee portals to their TPO portal
+      if (userProfile.role === 'tpo') {
+        return <Navigate to="/tpo" replace />
+      }
+      // Redirect other unauthorized users to home
+      return <Navigate to="/" replace />
+    }
   }
 
   return <>{children}</>

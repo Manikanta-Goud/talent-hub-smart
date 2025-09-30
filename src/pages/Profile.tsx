@@ -10,13 +10,49 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { checkDatabaseHealth, setupDatabase } from "@/lib/database-setup";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, userProfile, updateProfile, signOut } = useAuth();
+  const { user, userProfile, updateProfile, signOut, loading } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dbHealth, setDbHealth] = useState<any>(null);
+  const [showDbSetup, setShowDbSetup] = useState(false);
+
+  // Check database health on component mount
+  useEffect(() => {
+    const checkDb = async () => {
+      const health = await checkDatabaseHealth();
+      setDbHealth(health);
+      console.log('🏥 Database health:', health);
+    };
+    checkDb();
+  }, []);
+
+  const handleSetupDatabase = async () => {
+    setShowDbSetup(true);
+    const result = await setupDatabase();
+    console.log('🔧 Database setup result:', result);
+    
+    if (result.success) {
+      toast({
+        title: "Database Setup",
+        description: result.message,
+      });
+      // Re-check database health
+      const health = await checkDatabaseHealth();
+      setDbHealth(health);
+    } else {
+      toast({
+        title: "Database Setup Failed",
+        description: result.error,
+        variant: "destructive",
+      });
+    }
+    setShowDbSetup(false);
+  };
 
   // Always use latest userProfile except for TPO test account
   const displayProfile = (user?.email === 'tpo@gmail.com') ? {
@@ -283,20 +319,100 @@ const Profile = () => {
     return user?.email?.[0]?.toUpperCase() || 'U';
   };
 
-  if (!userProfile) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
         <Card className="w-full max-w-md mx-4">
           <CardContent className="p-6 text-center">
-            <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Profile Not Found</h2>
-            <p className="text-muted-foreground mb-4">
-              It looks like your profile hasn't been set up yet.
+            <Loader2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+            <h2 className="text-xl font-semibold mb-2">Loading Profile...</h2>
+            <p className="text-muted-foreground">
+              Please wait while we load your profile.
             </p>
-            <Button onClick={() => navigate('/')}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <Card className="w-full max-w-2xl mx-4">
+          <CardContent className="p-6">
+            <div className="text-center mb-6">
+              <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Profile Not Found</h2>
+              <p className="text-muted-foreground mb-4">
+                Let's diagnose and fix the issue with your profile.
+              </p>
+            </div>
+            
+            {/* Debug Information */}
+            <div className="text-left bg-gray-100 p-4 rounded mb-4 text-sm space-y-2">
+              <p><strong>🔍 Debug Information:</strong></p>
+              <p>• User Status: {user ? '✅ Logged in' : '❌ Not logged in'}</p>
+              <p>• Email: {user?.email || '❌ No email'}</p>
+              <p>• User ID: {user?.id || '❌ No ID'}</p>
+              <p>• Profile Status: {userProfile ? '✅ Found' : '❌ Not found'}</p>
+              <p>• Loading: {loading ? '🔄 Yes' : '✅ No'}</p>
+              <p>• Database Health: {dbHealth ? 
+                (dbHealth.healthy ? '✅ Healthy' : `❌ ${dbHealth.error}`) : 
+                '🔄 Checking...'
+              }</p>
+            </div>
+
+            {/* Database Setup Section */}
+            {dbHealth && !dbHealth.healthy && (
+              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded mb-4">
+                <h3 className="font-semibold text-yellow-800 mb-2">🔧 Database Setup Required</h3>
+                <p className="text-yellow-700 text-sm mb-3">
+                  The profiles table needs to be set up in your Supabase database.
+                </p>
+                <Button 
+                  onClick={handleSetupDatabase} 
+                  disabled={showDbSetup}
+                  variant="outline"
+                  size="sm"
+                >
+                  {showDbSetup ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Setting up...
+                    </>
+                  ) : (
+                    'Setup Database'
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Manual Database Setup Instructions */}
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded mb-4">
+              <h3 className="font-semibold text-blue-800 mb-2">📝 Manual Setup Instructions</h3>
+              <p className="text-blue-700 text-sm mb-2">
+                If automatic setup fails, run this SQL in your Supabase SQL Editor:
+              </p>
+              <div className="bg-white p-2 rounded border text-xs font-mono overflow-x-auto">
+                <code>
+                  {`-- Copy and run setup-database.sql file in Supabase SQL Editor
+-- File location: setup-database.sql in your project root`}
+                </code>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button onClick={() => navigate('/')} variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="default"
+              >
+                🔄 Retry
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

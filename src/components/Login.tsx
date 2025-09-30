@@ -58,24 +58,31 @@ export const Login: React.FC = () => {
     setError('')
 
     try {
-      const { error } = await signIn(email, password)
+      const { error } = await signIn(email, password, role)
       
       if (error) {
         setError(error.message)
       } else {
-        // Navigate based on role
-        switch (role) {
-          case 'student':
-            navigate('/student')
-            break
-          case 'employee':
-            navigate('/employee')
-            break
-          case 'tpo':
-            navigate('/tpo')
-            break
-          default:
-            navigate('/')
+        // Check if there's a return URL from protected route
+        const from = location.state?.from?.pathname || null
+        
+        // Navigate based on role or return URL
+        if (from && from !== '/login') {
+          navigate(from, { replace: true })
+        } else {
+          switch (role) {
+            case 'student':
+              navigate('/student')
+              break
+            case 'employee':
+              navigate('/employee')
+              break
+            case 'tpo':
+              navigate('/tpo')
+              break
+            default:
+              navigate('/')
+          }
         }
       }
     } catch (err) {

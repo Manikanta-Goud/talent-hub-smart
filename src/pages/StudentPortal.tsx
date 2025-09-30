@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Communication from "@/components/Communication";
 import { 
   User, 
   Search, 
   Brain, 
-  Briefcase, 
   Clock, 
   MapPin, 
   Star, 
@@ -23,18 +25,107 @@ import {
   Sparkles,
   Target,
   FileText,
-  Calendar
+  Calendar,
+  LogOut,
+  Users,
+  BarChart3,
+  MessageSquare,
+  Send,
+  Phone,
+  Mail,
+  Filter,
+  Briefcase
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const StudentPortal = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signOut, userProfile, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCommunication, setShowCommunication] = useState(false);
+  const [selectedMentor, setSelectedMentor] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Sample user name for header - this could come from auth context
   const userName = "Alex Johnson";
+
+  // Check user role for privacy controls
+  const isTPOUser = userProfile?.role === 'tpo';
+  const isStudentUser = userProfile?.role === 'student' || user?.email === 'student@gmail.com';
+  const isEmployeeUser = userProfile?.role === 'employee' || user?.email === 'employee@gmail.com';
+
+  // Privacy-controlled student data based on user role
+  const getStudentData = () => {
+    const baseStudentData = [
+      { name: "Arjun Mehta", course: "Computer Science", year: "3rd Year", status: "online", avatar: "AM" },
+      { name: "Priya Patel", course: "Data Science", year: "2nd Year", status: "online", avatar: "PP" },
+      { name: "Rohit Sharma", course: "Software Engineering", year: "4th Year", status: "offline", avatar: "RS" },
+      { name: "Sneha Reddy", course: "AI & ML", year: "3rd Year", status: "online", avatar: "SR" },
+      { name: "Karan Singh", course: "Computer Science", year: "2nd Year", status: "offline", avatar: "KS" },
+      { name: "Ananya Das", course: "Data Science", year: "4th Year", status: "online", avatar: "AD" }
+    ];
+
+    if (isTPOUser) {
+      // TPO can see basic information only (name, course, year) - no personal details
+      return baseStudentData.map(student => ({
+        name: student.name,
+        course: student.course,
+        year: student.year,
+        avatar: student.avatar,
+        status: "Privacy Protected", // Hide online status
+        mutual: "Information Protected", // Hide mutual friends
+        hideActions: true // Hide contact actions
+      }));
+    } else if (isStudentUser) {
+      // Students can see other students' info with mutual connections
+      return baseStudentData.map(student => ({
+        ...student,
+        mutual: Math.floor(Math.random() * 8) + 1 + " mutual friends",
+        hideActions: false
+      }));
+    } else {
+      // Employees get very limited access - only names and general info
+      return baseStudentData.map(student => ({
+        name: student.name,
+        course: "Information Protected",
+        year: "Protected",
+        avatar: student.avatar,
+        status: "Privacy Protected",
+        mutual: "Information Protected",
+        hideActions: true
+      }));
+    }
+  };
+
+  const handleRequestMentorship = (mentor) => {
+    toast({
+      title: "Mentorship Request Sent!",
+      description: `Your request has been sent to ${mentor.name}. They will respond within ${mentor.responseTime}.`,
+      variant: "default",
+    });
+  };
+
+  const handleViewProfile = (mentor) => {
+    setSelectedMentor(mentor);
+    setShowProfileModal(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const opportunities = [
     {
@@ -111,6 +202,106 @@ const StudentPortal = () => {
     }
   ];
 
+  // Available employees/mentors for student view (limited info for privacy)
+  const availableEmployees = [
+    {
+      id: 1,
+      name: "Sarah Chen",
+      title: "Senior Software Engineer",
+      company: "Google",
+      avatar: "SC",
+      rating: 4.9,
+      totalMentees: 45,
+      expertise: ["React", "Node.js", "System Design", "Career Guidance"],
+      experience: "5+ years",
+      bio: "Passionate about helping students transition from academia to industry. Specialized in full-stack development and system architecture.",
+      availability: "Available",
+      responseTime: "Usually responds within 2 hours",
+      languages: ["English", "Mandarin"],
+      location: "Bangalore"
+    },
+    {
+      id: 2,
+      name: "Rajesh Kumar",
+      title: "Machine Learning Engineer",
+      company: "Microsoft",
+      avatar: "RK",
+      rating: 4.8,
+      totalMentees: 38,
+      expertise: ["Python", "Machine Learning", "Data Science", "AI"],
+      experience: "6+ years",
+      bio: "ML enthusiast with expertise in deep learning and computer vision. Love guiding students in their AI journey.",
+      availability: "Available",
+      responseTime: "Usually responds within 1 hour",
+      languages: ["English", "Hindi"],
+      location: "Hyderabad"
+    },
+    {
+      id: 3,
+      name: "Priya Sharma",
+      title: "DevOps Engineer",
+      company: "Amazon",
+      avatar: "PS",
+      rating: 4.7,
+      totalMentees: 32,
+      expertise: ["AWS", "Docker", "Kubernetes", "CI/CD"],
+      experience: "4+ years",
+      bio: "Cloud infrastructure expert helping students understand modern DevOps practices and cloud technologies.",
+      availability: "Busy - Limited slots",
+      responseTime: "Usually responds within 4 hours",
+      languages: ["English"],
+      location: "Mumbai"
+    },
+    {
+      id: 4,
+      name: "David Wilson",
+      title: "Product Manager",
+      company: "Meta",
+      avatar: "DW",
+      rating: 4.9,
+      totalMentees: 28,
+      expertise: ["Product Strategy", "User Research", "Analytics", "Leadership"],
+      experience: "7+ years",
+      bio: "Product management veteran helping students understand the business side of technology and product development.",
+      availability: "Available",
+      responseTime: "Usually responds within 3 hours",
+      languages: ["English"],
+      location: "Bangalore"
+    },
+    {
+      id: 5,
+      name: "Anita Desai",
+      title: "Cybersecurity Specialist",
+      company: "IBM",
+      avatar: "AD",
+      rating: 4.8,
+      totalMentees: 25,
+      expertise: ["Cybersecurity", "Ethical Hacking", "Network Security", "Compliance"],
+      experience: "8+ years",
+      bio: "Cybersecurity expert passionate about making the digital world safer. Guiding next-gen security professionals.",
+      availability: "Available",
+      responseTime: "Usually responds within 2 hours",
+      languages: ["English", "Hindi"],
+      location: "Delhi"
+    },
+    {
+      id: 6,
+      name: "Michael Zhang",
+      title: "Frontend Architect",
+      company: "Netflix",
+      avatar: "MZ",
+      rating: 4.9,
+      totalMentees: 52,
+      expertise: ["React", "TypeScript", "UI/UX", "Performance Optimization"],
+      experience: "6+ years",
+      bio: "Frontend specialist with a passion for creating amazing user experiences. Helping students master modern web development.",
+      availability: "Available",
+      responseTime: "Usually responds within 1 hour",
+      languages: ["English", "Mandarin"],
+      location: "Bangalore"
+    }
+  ];
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'offer received': return 'bg-success text-success-foreground';
@@ -165,23 +356,45 @@ const StudentPortal = () => {
                 </div>
               </div>
             </div>
-            <Badge className="bg-campus-primary text-white">
-              <Star className="w-4 h-4 mr-1" />
-              Premium Student
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-campus-primary text-white">
+                <Star className="w-4 h-4 mr-1" />
+                Premium Student
+              </Badge>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowCommunication(true)}
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Communicate
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="opportunities" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="opportunities" className="flex items-center gap-2">
-              <Search className="w-4 h-4" />
-              Opportunities
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="friends" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Friends
+            </TabsTrigger>
+            <TabsTrigger value="employee-portal" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Find Mentors
             </TabsTrigger>
             <TabsTrigger value="applications" className="flex items-center gap-2">
-              <Briefcase className="w-4 h-4" />
+              <FileText className="w-4 h-4" />
               My Applications
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
@@ -190,96 +403,429 @@ const StudentPortal = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Opportunities Tab */}
-          <TabsContent value="opportunities">
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard">
             <div className="space-y-6">
               <Card className="border-0 bg-gradient-primary text-white">
                 <CardHeader>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Brain className="w-5 h-5" />
-                    <CardTitle>AI-Powered Recommendations</CardTitle>
-                  </div>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Student Dashboard
+                  </CardTitle>
                   <CardDescription className="text-white/80">
-                    Your personalized opportunity feed based on skills, interests, and career goals
+                    Your academic and career progress overview
                   </CardDescription>
                 </CardHeader>
               </Card>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <Label htmlFor="search">Search Opportunities</Label>
-                  <Input
-                    id="search"
-                    placeholder="Search by company, role, or skills..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <Button variant="student" className="self-end">
-                  <Search className="w-4 h-4 mr-2" />
-                  Search
-                </Button>
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-600">12</div>
+                    <p className="text-sm text-muted-foreground">Applications Sent</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600">3</div>
+                    <p className="text-sm text-muted-foreground">Interviews Scheduled</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-yellow-600">8</div>
+                    <p className="text-sm text-muted-foreground">Mentors Connected</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-purple-600">85%</div>
+                    <p className="text-sm text-muted-foreground">Profile Completion</p>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="grid gap-4">
-                {filteredOpportunities.map((opportunity) => (
-                  <Card key={opportunity.id} className="group hover:shadow-medium transition-spring">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
+              {/* Recent Activity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <div className="flex-1">
+                      <p className="font-medium">Application submitted to TechCorp</p>
+                      <p className="text-sm text-muted-foreground">2 hours ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <Star className="w-5 h-5 text-yellow-600" />
+                    <div className="flex-1">
+                      <p className="font-medium">Received mentorship request approval</p>
+                      <p className="text-sm text-muted-foreground">5 hours ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <div className="flex-1">
+                      <p className="font-medium">Interview scheduled with DataSense Labs</p>
+                      <p className="text-sm text-muted-foreground">1 day ago</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Goals Progress */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Goals Progress</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Internship Applications</span>
+                      <span className="text-sm text-muted-foreground">12/15</span>
+                    </div>
+                    <Progress value={80} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Skill Development</span>
+                      <span className="text-sm text-muted-foreground">6/10</span>
+                    </div>
+                    <Progress value={60} className="h-2" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="font-medium">Network Building</span>
+                      <span className="text-sm text-muted-foreground">8/12</span>
+                    </div>
+                    <Progress value={67} className="h-2" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Friends Tab */}
+          <TabsContent value="friends">
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-2">
+                  <Users className="w-8 h-8 text-blue-600" />
+                  Your Study Circle
+                </h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto mb-4">
+                  Connect with fellow students, share knowledge, and build lasting friendships that support your academic journey.
+                </p>
+                
+                {/* Privacy Notice */}
+                <div className="max-w-3xl mx-auto mb-6">
+                  <Card className={`border-2 ${
+                    isTPOUser ? 'border-orange-200 bg-orange-50' : 
+                    isEmployeeUser ? 'border-blue-200 bg-blue-50' : 
+                    'border-green-200 bg-green-50'
+                  }`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className={`w-5 h-5 mt-0.5 ${
+                          isTPOUser ? 'text-orange-600' : 
+                          isEmployeeUser ? 'text-blue-600' : 
+                          'text-green-600'
+                        }`} />
+                        <div className="text-left">
+                          <h4 className={`font-semibold mb-2 ${
+                            isTPOUser ? 'text-orange-800' : 
+                            isEmployeeUser ? 'text-blue-800' : 
+                            'text-green-800'
+                          }`}>
+                            Privacy Notice - {
+                              isTPOUser ? 'TPO View' : 
+                              isEmployeeUser ? 'Employee View' : 
+                              'Student View'
+                            }
+                          </h4>
+                          <p className={`text-sm ${
+                            isTPOUser ? 'text-orange-700' : 
+                            isEmployeeUser ? 'text-blue-700' : 
+                            'text-green-700'
+                          }`}>
+                            {isTPOUser 
+                              ? "As a TPO, you can see basic student information (names, courses, academic year) for administrative purposes. Personal details, contact information, and online status are protected for student privacy."
+                              : isEmployeeUser 
+                              ? "As an employee, you have limited access to student information to respect their privacy. Only basic academic information is visible to facilitate appropriate mentorship connections."
+                              : "You can see other students' profiles and connect with them. Your privacy is protected - only basic academic and interest information is shared with other users."
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Friend Search */}
+              <Card className="p-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <Input 
+                      placeholder="Search friends by name, course, or interests..." 
+                      className="w-full"
+                    />
+                  </div>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Search className="w-4 h-4" />
+                    Find Friends
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Friends Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getStudentData().map((friend, index) => (
+                  <Card key={index} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-500">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start gap-4">
+                        <div className="relative">
+                          <Avatar className="h-16 w-16 border-2 border-green-200">
+                            <AvatarFallback className="bg-gradient-primary text-white text-lg font-semibold">
+                              {friend.avatar}
+                            </AvatarFallback>
+                          </Avatar>
+                          {!friend.hideActions && (
+                            <div className={`absolute bottom-0 right-0 h-4 w-4 ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'} border-2 border-white rounded-full`}></div>
+                          )}
+                        </div>
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <CardTitle className="text-xl">{opportunity.title}</CardTitle>
-                            <Badge className="bg-gradient-secondary text-white">
-                              <Target className="w-3 h-3 mr-1" />
-                              {opportunity.matchScore}% Match
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">{friend.name}</h3>
+                            <Badge variant={friend.status === 'online' ? 'default' : friend.status.includes('Privacy') ? 'outline' : 'secondary'} className="text-xs">
+                              {friend.status}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-4 text-muted-foreground mb-3">
-                            <span className="font-semibold text-foreground">{opportunity.company}</span>
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {opportunity.location}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {opportunity.duration}
-                            </span>
-                          </div>
-                          <p className="text-muted-foreground mb-3">{opportunity.description}</p>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {opportunity.skills.map((skill, index) => (
-                              <Badge key={index} variant="secondary">
-                                {skill}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-semibold text-success">{opportunity.stipend}</div>
-                          <div className="text-sm text-muted-foreground">Deadline: {opportunity.deadline}</div>
+                          <p className="text-sm text-muted-foreground">{friend.course}</p>
+                          <p className="text-sm font-medium text-blue-600">{friend.year}</p>
+                          <p className="text-xs text-muted-foreground mt-2">{friend.mutual}</p>
                         </div>
                       </div>
                     </CardHeader>
+                    <CardContent className="space-y-3">
+                      {!friend.hideActions ? (
+                        <div className="flex gap-2">
+                          <Button variant="default" size="sm" className="flex-1">
+                            <User className="w-4 h-4 mr-2" />
+                            View Profile
+                          </Button>
+                          <Button variant="outline" size="sm" className="flex-1">
+                            <MessageSquare className="w-4 h-4 mr-2" />
+                            Message
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="text-center py-4">
+                          <p className="text-xs text-muted-foreground">
+                            {isTPOUser ? "TPO View - Basic Information Only" : "Access Restricted"}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Study Groups Section */}
+              <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-700">
+                    <Users className="w-5 h-5" />
+                    Study Groups
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">JavaScript Study Group</CardTitle>
+                      <p className="text-sm text-muted-foreground">12 members • Active</p>
+                    </CardHeader>
                     <CardContent>
-                      <div className="flex gap-3">
+                      <p className="text-sm mb-3">Weekly coding sessions and project discussions</p>
+                      <Button size="sm" variant="outline">Join Group</Button>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Data Structures & Algorithms</CardTitle>
+                      <p className="text-sm text-muted-foreground">8 members • Active</p>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm mb-3">Daily problem solving and peer learning</p>
+                      <Button size="sm" variant="outline">Join Group</Button>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Opportunities Tab */}
+          {/* Employee Portal Tab - For Students to view employees */}
+          <TabsContent value="employee-portal">
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-2">
+                  <Users className="w-8 h-8 text-blue-600" />
+                  Find Your Mentor
+                </h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  Connect with industry professionals who are ready to guide you in your career journey. 
+                  Get personalized mentorship from experienced employees across various fields.
+                </p>
+              </div>
+
+              {/* Search Bar */}
+              <Card className="p-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <Input 
+                      placeholder="Search mentors by expertise, company, or skills..." 
+                      className="w-full"
+                    />
+                  </div>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    Filter by Skills
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Available Mentors Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {availableEmployees.map((mentor) => (
+                  <Card key={mentor.id} className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-16 w-16 border-2 border-blue-200">
+                          <AvatarFallback className="bg-gradient-secondary text-white text-lg font-semibold">
+                            {mentor.avatar}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">{mentor.name}</h3>
+                            <Badge variant={mentor.availability === 'Available' ? 'default' : 'secondary'} className="text-xs">
+                              {mentor.availability}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{mentor.title}</p>
+                          <p className="text-sm font-medium text-blue-600">{mentor.company}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                              <span className="text-sm font-medium">{mentor.rating}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">{mentor.totalMentees} mentees</span>
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">{mentor.experience}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">{mentor.bio}</p>
+                      
+                      {/* Expertise Tags */}
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Expertise:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {mentor.expertise.slice(0, 3).map((skill, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {skill}
+                            </Badge>
+                          ))}
+                          {mentor.expertise.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{mentor.expertise.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Contact Info */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          <span>{mentor.responseTime}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <MapPin className="w-3 h-3" />
+                          <span>{mentor.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Users className="w-3 h-3" />
+                          <span>Languages: {mentor.languages.join(', ')}</span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 pt-2">
                         <Button 
-                          variant="student" 
-                          onClick={() => handleApply(opportunity.id)}
+                          variant="default" 
+                          size="sm" 
                           className="flex-1"
+                          disabled={mentor.availability !== 'Available'}
+                          onClick={() => handleRequestMentorship(mentor)}
                         >
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Quick Apply
+                          <Send className="w-4 h-4 mr-2" />
+                          Request Mentorship
                         </Button>
-                        <Button variant="outline">
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Details
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewProfile(mentor)}
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          View Profile
                         </Button>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+
+              {/* Help Section */}
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-700">
+                    <Users className="w-5 h-5" />
+                    How Mentorship Works
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-blue-600 font-bold">1</span>
+                    </div>
+                    <h4 className="font-medium mb-2">Choose a Mentor</h4>
+                    <p className="text-sm text-muted-foreground">Browse available mentors and find someone who matches your interests and goals.</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-blue-600 font-bold">2</span>
+                    </div>
+                    <h4 className="font-medium mb-2">Send Request</h4>
+                    <p className="text-sm text-muted-foreground">Send a mentorship request and wait for the mentor to accept your request.</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-blue-600 font-bold">3</span>
+                    </div>
+                    <h4 className="font-medium mb-2">Learn & Grow</h4>
+                    <p className="text-sm text-muted-foreground">Get personalized guidance and accelerate your career development.</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -396,6 +942,158 @@ const StudentPortal = () => {
 
       {/* AI Assistant */}
       <AIAssistant />
+
+      {/* Profile Modal */}
+      {showProfileModal && selectedMentor && (
+        <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 border-2 border-blue-200">
+                  <AvatarFallback className="bg-gradient-secondary text-white text-lg font-semibold">
+                    {selectedMentor.avatar}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-bold">{selectedMentor.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedMentor.title}</p>
+                </div>
+              </DialogTitle>
+              <DialogDescription>
+                Detailed profile and mentorship information for {selectedMentor.name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 mt-4">
+              {/* Professional Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Professional Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Company</Label>
+                      <p className="font-medium text-blue-600">{selectedMentor.company}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Experience</Label>
+                      <p className="font-medium">{selectedMentor.experience}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Location</Label>
+                      <p className="font-medium flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {selectedMentor.location}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-muted-foreground">Availability</Label>
+                      <Badge variant={selectedMentor.availability === 'Available' ? 'default' : 'secondary'}>
+                        {selectedMentor.availability}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Bio</Label>
+                    <p className="text-sm mt-1">{selectedMentor.bio}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Skills & Expertise */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Skills & Expertise</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMentor.expertise.map((skill, idx) => (
+                      <Badge key={idx} variant="outline" className="text-sm">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Mentorship Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Mentorship Statistics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-2xl font-bold text-blue-600">{selectedMentor.totalMentees}</div>
+                      <p className="text-sm text-muted-foreground">Mentees</p>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-yellow-600 flex items-center justify-center gap-1">
+                        <Star className="w-5 h-5 fill-current" />
+                        {selectedMentor.rating}
+                      </div>
+                      <p className="text-sm text-muted-foreground">Rating</p>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-green-600">{selectedMentor.responseTime}</div>
+                      <p className="text-sm text-muted-foreground">Response Time</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Languages */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Languages</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMentor.languages.map((language, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-sm">
+                        {language}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button 
+                  className="flex-1"
+                  disabled={selectedMentor.availability !== 'Available'}
+                  onClick={() => {
+                    handleRequestMentorship(selectedMentor);
+                    setShowProfileModal(false);
+                  }}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Request Mentorship
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Send Message
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <Phone className="w-4 h-4 mr-2" />
+                  Schedule Call
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Communication Modal */}
+      {showCommunication && (
+        <Communication 
+          onClose={() => setShowCommunication(false)}
+          userRole="student"
+        />
+      )}
     </div>
   );
 };

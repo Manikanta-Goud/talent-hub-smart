@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { supabase, UserProfile, Student, Employee, TPOOfficer } from '../lib/supabase'
+import { getSimpleProfile, createOrUpdateProfile, SimpleProfile } from '../lib/simple-profile-service'
 import { 
   registerUserWithRole, 
-  getUserProfile, 
   updateStudentProfile,
   updateEmployeeProfile,
   updateTPOProfile,
@@ -15,7 +15,7 @@ interface AuthContextType {
   userProfile: UserProfile | null
   session: Session | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
+  signIn: (email: string, password: string, role?: 'student' | 'employee' | 'tpo') => Promise<{ error: AuthError | null }>
   signUp: (
     email: string, 
     password: string, 
@@ -41,7 +41,15 @@ export const useAuth = () => {
   return context
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Test users for development
+const testUsers = {
+  'student@gmail.com': 'student',
+  'employee@gmail.com': 'employee',
+  'employees@gmail.com': 'employee',
+  'tpo@gmail.com': 'tpo'
+}
+
+const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
@@ -75,27 +83,111 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchUserProfile = async (userId: string, userEmail?: string) => {
+    console.log('👤 Fetching user profile:', { userId, userEmail })
+    
     try {
-      const profile = await getUserProfile(userId, userEmail)
-      setUserProfile(profile)
+      // Handle test users - don't fetch from database
+      if (userId === 'test-user-id' && userEmail) {
+        const normalizedEmail = userEmail.toLowerCase();
+        if (normalizedEmail in testUsers) {
+          // Test user profile is already set during login, don't override it
+          console.log('🧪 Test user detected, skipping database fetch')
+          setLoading(false); // Make sure to set loading to false for test users
+          return;
+        }
+      }
+      
+      console.log('🔍 Attempting to get profile from database...')
+      const profile = await getSimpleProfile(userId, userEmail)
+      
+      if (profile) {
+        console.log('✅ Profile found, converting to UserProfile format')
+        // Convert SimpleProfile to UserProfile format
+        let userProfile: UserProfile
+        
+        if (profile.role === 'student') {
+          userProfile = {
+            ...profile,
+            student_id: profile.student_id || 'STU001',
+            university: profile.university || 'University',
+            course: profile.course || 'Computer Science',
+            graduation_year: profile.graduation_year || 2025,
+            skills: profile.skills || []
+          } as Student
+        } else if (profile.role === 'employee') {
+          userProfile = {
+            ...profile,
+            employee_id: profile.employee_id || 'EMP001',
+            company_name: profile.company_name || 'Company',
+            job_title: profile.job_title || 'Software Developer',
+            experience_years: profile.experience_years || 1,
+            skills: profile.skills || []
+          } as Employee
+        } else {
+          userProfile = {
+            ...profile,
+            officer_id: profile.officer_id || 'TPO001',
+            company_name: profile.company_name || 'Company',
+            global_ranking: 'Top Company',
+            company_type: 'mnc',
+            industry_type: 'technology',
+            ceo_name: 'CEO Name',
+            ceo_email: 'ceo@company.com',
+            executive_position: 'CEO',
+            years_of_experience: 10,
+            access_level: 'full_admin',
+            can_access_students: true,
+            can_access_employees: true,
+            can_post_opportunities: true,
+            can_conduct_hackathons: true,
+            can_view_analytics: true
+          } as TPOOfficer
+        }
+        
+        console.log('📋 Setting user profile:', userProfile)
+        setUserProfile(userProfile)
+      } else {
+        console.log('🆕 No profile found, creating basic profile for new user')
+        // Create a basic profile for new users
+        if (userEmail) {
+          console.log('💾 Creating new profile in database...')
+          const basicProfile = await createOrUpdateProfile({
+            user_id: userId,
+            email: userEmail,
+            full_name: userEmail.split('@')[0],
+            role: 'student' // Default role
+          })
+          
+          console.log('✅ Basic profile created:', basicProfile)
+          
+          const userProfile: Student = {
+            ...basicProfile,
+            student_id: basicProfile.student_id || 'STU001',
+            university: basicProfile.university || 'University',
+            course: basicProfile.course || 'Computer Science',
+            graduation_year: basicProfile.graduation_year || 2025,
+            skills: basicProfile.skills || []
+          } as Student
+          
+          console.log('📋 Setting new user profile:', userProfile)
+          setUserProfile(userProfile)
+        }
+      }
     } catch (error) {
-      console.error('Error fetching user profile:', error)
+      console.error('💥 Error fetching user profile:', error)
       setUserProfile(null)
     } finally {
+      console.log('⏰ Setting loading to false')
       setLoading(false)
     }
   }
 
-  const signIn = async (email: string, password: string) => {
-    // Handle test users for development
-    const testUsers = {
-      'student@gmail.com': 'student',
-      'employee@gmail.com': 'employee',
-      'employees@gmail.com': 'employee',
-      'tpo@gmail.com': 'tpo'
-    }
+  const signIn = async (email: string, password: string, selectedRole?: 'student' | 'employee' | 'tpo') => {
     const normalizedEmail = email.toLowerCase();
     if (normalizedEmail in testUsers && password === '12345678') {
+      // Use selected role for test users instead of hardcoded role
+      const userRole = selectedRole || testUsers[normalizedEmail as keyof typeof testUsers];
+      
       // Create a mock user session for test users
       const mockUser = {
         id: 'test-user-id',
@@ -104,9 +196,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         aud: 'authenticated',
         created_at: new Date().toISOString(),
         user_metadata: {
-          full_name: normalizedEmail === 'tpo@gmail.com' ? 'Microsoft Corporation' : 
-                    (normalizedEmail === 'employee@gmail.com' || normalizedEmail === 'employees@gmail.com') ? 'Test Employee' : 'Test Student',
-          role: testUsers[normalizedEmail as keyof typeof testUsers]
+          full_name: userRole === 'tpo' ? 'Microsoft Corporation' : 
+                    userRole === 'employee' ? 'Test Employee' : 'Test Student',
+          role: userRole
         }
       } as User
       setUser(mockUser)
@@ -117,13 +209,73 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         expires_in: 3600,
         token_type: 'bearer'
       } as Session)
-      // Fetch test profile
-      try {
-        const profile = await getUserProfile('test-user-id', normalizedEmail)
-        setUserProfile(profile)
-      } catch (error) {
-        console.error('Error fetching test profile:', error)
+      
+      // Create/update test profile with selected role
+      let mockProfile: UserProfile
+      
+      if (userRole === 'student') {
+        mockProfile = {
+          id: 'test-user-id',
+          user_id: 'test-user-id',
+          email: normalizedEmail,
+          full_name: 'Test Student',
+          role: 'student',
+          student_id: 'STU001',
+          university: 'Test University',
+          course: 'Computer Science',
+          graduation_year: 2025,
+          skills: ['JavaScript', 'React'],
+          phone_number: '1234567890',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as Student
+      } else if (userRole === 'employee') {
+        mockProfile = {
+          id: 'test-user-id',
+          user_id: 'test-user-id',
+          email: normalizedEmail,
+          full_name: 'Test Employee',
+          role: 'employee',
+          employee_id: 'EMP001',
+          company_name: 'Test Company',
+          job_title: 'Software Developer',
+          experience_years: 3,
+          skills: ['React', 'Node.js'],
+          phone_number: '1234567890',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as Employee
+      } else {
+        mockProfile = {
+          id: 'test-user-id',
+          user_id: 'test-user-id',
+          email: normalizedEmail,
+          full_name: 'Microsoft Corporation',
+          role: 'tpo',
+          officer_id: 'TPO001',
+          company_name: 'Microsoft Corporation',
+          global_ranking: 'Top 10',
+          company_type: 'mnc',
+          industry_type: 'technology',
+          ceo_name: 'Satya Nadella',
+          ceo_email: 'ceo@microsoft.com',
+          executive_position: 'CEO',
+          years_of_experience: 30,
+          access_level: 'full_admin',
+          can_access_students: true,
+          can_access_employees: true,
+          can_post_opportunities: true,
+          can_conduct_hackathons: true,
+          can_view_analytics: true,
+          phone_number: '1234567890',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } as TPOOfficer
       }
+      
+      setUserProfile(mockProfile)
+      setLoading(false) // Set loading to false immediately for test users
+      
       return { error: null }
     }
     
@@ -139,10 +291,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error checking email during login:', checkError)
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
+    // Sign in with Supabase
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
+
+    // If login successful and role is selected, update the user's role
+    if (!error && authData.user && selectedRole) {
+      try {
+        // Update user profile with selected role
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ role: selectedRole, updated_at: new Date().toISOString() })
+          .eq('user_id', authData.user.id)
+
+        if (!updateError) {
+          // Refresh user profile to get updated role
+          await fetchUserProfile(authData.user.id, authData.user.email)
+        }
+      } catch (updateError) {
+        console.error('Error updating user role:', updateError)
+      }
+    }
+
     return { error }
   }
 
@@ -223,26 +395,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      // Update profile based on role
-      const role = userProfile.role
-      switch (role) {
-        case 'student':
-          await updateStudentProfile(user.id, updates as Partial<Student>)
-          break
-        case 'employee':
-          await updateEmployeeProfile(user.id, updates as Partial<Employee>)
-          break
-        case 'tpo':
-          await updateTPOProfile(user.id, updates as Partial<TPOOfficer>)
-          break
-        default:
-          throw new Error(`Invalid role: ${role}`)
-      }
+      // Update profile using simple profile service
+      await createOrUpdateProfile({
+        user_id: user.id,
+        email: user.email,
+        ...updates
+      })
 
       // Refresh user profile
       await fetchUserProfile(user.id, user.email)
       return { error: null }
     } catch (error) {
+      console.error('Error updating profile:', error)
       return { error: error as Error }
     }
   }
@@ -284,3 +448,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
+
+export { AuthProvider }

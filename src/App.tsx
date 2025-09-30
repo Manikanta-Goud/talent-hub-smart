@@ -42,18 +42,23 @@ const App = () => (
                 <Index />
               </ProtectedRoute>
             } />
-            <Route path="/student" element={
+            <Route path="/dashboard" element={
               <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            } />
+            <Route path="/student" element={
+              <ProtectedRoute allowedRoles={['student', 'employee']}>
                 <StudentPortal />
               </ProtectedRoute>
             } />
             <Route path="/tpo" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['tpo']}>
                 <TPOPortal />
               </ProtectedRoute>
             } />
             <Route path="/employee" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['employee', 'student']}>
                 <EmployeePortal />
               </ProtectedRoute>
             } />

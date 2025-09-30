@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Users, BarChart3, Zap, Target, Sparkles, User, Briefcase } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Brain, Users, BarChart3, Zap, Target, Sparkles, User, Briefcase, LogOut, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -15,6 +16,9 @@ import roleBasedPortals from "@/assets/role-based-portals.jpg";
 const LandingPage = () => {
   const navigate = useNavigate();
   const { user, userProfile, signOut } = useAuth();
+
+  // Determine user role with fallback - default to 'student' if no role is set
+  const userRole: 'student' | 'employee' | 'tpo' = userProfile?.role || 'student';
 
   const handleLogout = async () => {
     await signOut();
@@ -91,27 +95,65 @@ const LandingPage = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            {/* Direct Profile Button */}
-            <Button 
-              variant="ghost" 
-              className="relative h-12 w-12 rounded-full hover:bg-muted/50 transition-all duration-200 ring-2 ring-transparent hover:ring-primary/20 focus:ring-primary/30"
-              onClick={() => navigate('/profile')}
-            >
-              <Avatar className="h-11 w-11 border-2 border-white/20 shadow-md">
-                <AvatarImage 
-                  src={(userProfile as any)?.resume_url} 
-                  alt={userProfile?.full_name}
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-gradient-primary text-white font-semibold text-sm">
-                  {getUserInitials()}
-                </AvatarFallback>
-              </Avatar>
-              {/* Online indicator */}
-              <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
-            </Button>
+            {/* Profile Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="relative h-12 w-12 rounded-full hover:bg-muted/50 transition-all duration-200 ring-2 ring-transparent hover:ring-primary/20 focus:ring-primary/30"
+                >
+                  <Avatar className="h-11 w-11 border-2 border-white/20 shadow-md">
+                    <AvatarImage 
+                      src={(userProfile as any)?.resume_url} 
+                      alt={userProfile?.full_name}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-gradient-primary text-white font-semibold text-sm">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Online indicator */}
+                  <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="flex items-center gap-2 p-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage 
+                      src={(userProfile as any)?.resume_url} 
+                      alt={userProfile?.full_name}
+                    />
+                    <AvatarFallback className="bg-gradient-primary text-white text-xs">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {userProfile?.full_name || 'User'}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userProfile?.email || user?.email}
+                    </p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
-            {/* Direct Profile Access - No Dropdown */}
+            {/* Direct Profile Access - Backup Button */}
             <Button 
               onClick={() => navigate('/profile')}
               variant="ghost" 
@@ -145,38 +187,108 @@ const LandingPage = () => {
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               {userProfile ? 
-                `Ready to explore new opportunities? Access your personalized dashboard and discover internships tailored for ${(userProfile as any)?.course} students.` :
+                `Ready to explore new opportunities? Access your personalized dashboard and discover ${userRole === 'student' ? 'internships' : userRole === 'employee' ? 'mentorship opportunities' : 'TPO management tools'} tailored for ${userRole === 'student' ? (userProfile as any)?.course + ' students' : userRole + 's'}.` :
                 'Access your personalized dashboard and discover new opportunities tailored just for you.'
               }
             </p>
+            
+            {/* Quick Access Alert for Role-Based Navigation */}
+            {userProfile && (
+              <div className="mb-6">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto mb-4">
+                  <p className="text-sm text-blue-800 font-medium">
+                    🎯 Quick Access: As a <span className="font-bold capitalize">{userRole}</span>, 
+                    your primary portal is highlighted below in blue.
+                  </p>
+                </div>
+                
+                {/* Auto-Redirect Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (userRole === 'student') navigate('/student');
+                    else if (userRole === 'employee') navigate('/employee');
+                    else if (userRole === 'tpo') navigate('/tpo');
+                  }}
+                  className="bg-green-50 border-green-200 text-green-800 hover:bg-green-100 font-medium"
+                >
+                  🚀 Take me to my {userRole === 'student' ? 'Student' : userRole === 'employee' ? 'Employee' : 'TPO'} Portal
+                </Button>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                variant="hero" 
-                size="lg"
-                onClick={() => navigate('/student')}
-                className="text-lg px-8 py-3"
-              >
-                <Users className="w-5 h-5" />
-                Student Portal
-              </Button>
-              <Button
-                variant="employee"
-                size="lg"
-                onClick={() => navigate('/employee')}
-                className="text-lg px-8 py-3"
-              >
-                <Briefcase className="w-5 h-5" />
-                Employee Portal
-              </Button>
-              <Button 
-                variant="ai" 
-                size="lg"
-                onClick={() => navigate('/tpo')}
-                className="text-lg px-8 py-3"
-              >
-                <Target className="w-5 h-5" />
-                Admin Portal
-              </Button>
+              {/* Show role-appropriate primary button based on user role */}
+              {userRole === 'student' ? (
+                <Button 
+                  variant="hero" 
+                  size="lg"
+                  onClick={() => navigate('/student')}
+                  className="text-lg px-8 py-3"
+                >
+                  <Users className="w-5 h-5" />
+                  My Student Portal
+                </Button>
+              ) : userRole === 'employee' ? (
+                <Button
+                  variant="hero"
+                  size="lg"
+                  onClick={() => navigate('/employee')}
+                  className="text-lg px-8 py-3"
+                >
+                  <Briefcase className="w-5 h-5" />
+                  My Employee Portal
+                </Button>
+              ) : userRole === 'tpo' ? (
+                <Button 
+                  variant="hero" 
+                  size="lg"
+                  onClick={() => navigate('/tpo')}
+                  className="text-lg px-8 py-3"
+                >
+                  <Target className="w-5 h-5" />
+                  My TPO Portal
+                </Button>
+              ) : (
+                // This should never happen with our default logic, but safety fallback
+                <Button 
+                  variant="hero" 
+                  size="lg"
+                  onClick={() => navigate('/student')}
+                  className="text-lg px-8 py-3"
+                >
+                  <Users className="w-5 h-5" />
+                  Student Portal
+                </Button>
+              )}
+              
+              {/* Secondary portals - show other portals as secondary options (hide for TPO) */}
+              {userRole !== 'tpo' && (
+                <div className="flex gap-2">
+                  {userRole !== 'student' && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => navigate('/student')}
+                      className="text-lg px-6 py-3"
+                    >
+                      <Users className="w-5 h-5" />
+                      Student Portal
+                    </Button>
+                  )}
+                  {userRole !== 'employee' && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => navigate('/employee')}
+                      className="text-lg px-6 py-3"
+                    >
+                      <Briefcase className="w-5 h-5" />
+                      Employee Portal
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -30,19 +30,61 @@ import {
   FileText,
   UserCheck,
   MapPin,
-  Star
+  Star,
+  LogOut
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TPOPortal = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signOut, userProfile } = useAuth();
   const [isAddingOpportunity, setIsAddingOpportunity] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("all");
 
+  // Determine which tabs to show based on user role
+  const isTPOUser = userProfile?.role === 'tpo';
+  const isStudentOrEmployee = userProfile?.role === 'student' || userProfile?.role === 'employee';
+
+  console.log('🔍 TPOPortal - User role check:', {
+    userRole: userProfile?.role,
+    isTPOUser,
+    isStudentOrEmployee,
+    userProfile
+  });
+
+  // Get the portal title based on user role
+  const getPortalTitle = () => {
+    if (isTPOUser) return 'Admin Portal'
+    return 'TPO Portal'
+  }
+
+  const getPortalSubtitle = () => {
+    if (isTPOUser) return 'Placement Control Center'
+    if (userProfile?.role === 'student') return 'Find Opportunities & Companies'
+    if (userProfile?.role === 'employee') return 'Explore Opportunities & Companies'
+    return 'Portal Access'
+  }
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const opportunities = [
+    // Internship opportunities from Student Portal
     {
       id: 1,
       title: "Software Development Intern",
@@ -51,12 +93,15 @@ const TPOPortal = () => {
       location: "Bangalore",
       stipend: "₹25,000/month",
       deadline: "2024-01-15",
+      duration: "6 months",
       applicants: 45,
       status: "Active",
       skills: ["React", "Node.js", "JavaScript"],
       posted: "2024-01-01",
       description: "Join our dynamic team to build cutting-edge web applications.",
-      category: "Technology"
+      category: "Technology",
+      urgency: "Medium",
+      isNew: true
     },
     {
       id: 2,
@@ -66,30 +111,91 @@ const TPOPortal = () => {
       location: "Hyderabad",
       stipend: "₹30,000/month",
       deadline: "2024-01-20",
+      duration: "4 months",
       applicants: 32,
       status: "Active",
       skills: ["Python", "Machine Learning", "TensorFlow"],
       posted: "2024-01-03",
       description: "Research and develop innovative ML algorithms.",
-      category: "Research"
+      category: "Research",
+      urgency: "High",
+      isNew: false
     },
     {
       id: 3,
-      title: "Frontend Developer",
-      company: "StartupHub",
-      type: "Full-time",
-      location: "Mumbai",
-      stipend: "₹8,00,000/year",
-      deadline: "2024-01-25",
-      applicants: 28,
-      status: "Draft",
-      skills: ["React", "Vue.js", "CSS"],
-      posted: "2024-01-05",
-      description: "Create amazing user experiences in a startup environment.",
-      category: "Technology"
+      title: "Data Science Internship",
+      company: "Analytics Pro",
+      type: "Internship",
+      location: "Chennai",
+      stipend: "₹28,000/month",
+      deadline: "2024-02-05",
+      duration: "5 months",
+      applicants: 41,
+      status: "Active",
+      skills: ["Python", "R", "SQL", "Data Visualization"],
+      posted: "2024-01-07",
+      description: "Work on real-world data science projects with experienced mentors.",
+      category: "Data Science",
+      urgency: "Medium",
+      isNew: true
     },
     {
       id: 4,
+      title: "Cybersecurity Research Intern",
+      company: "SecureNet Labs",
+      type: "Internship",
+      location: "Pune",
+      stipend: "₹32,000/month",
+      deadline: "2024-02-12",
+      duration: "6 months",
+      applicants: 29,
+      status: "Active",
+      skills: ["Cybersecurity", "Ethical Hacking", "Network Security", "Python"],
+      posted: "2024-01-09",
+      description: "Research emerging cyber threats and develop security solutions.",
+      category: "Security",
+      urgency: "High",
+      isNew: false
+    },
+    {
+      id: 5,
+      title: "Blockchain Developer Intern",
+      company: "CryptoTech Solutions",
+      type: "Internship",
+      location: "Delhi",
+      stipend: "₹35,000/month",
+      deadline: "2024-02-18",
+      duration: "4 months",
+      applicants: 38,
+      status: "Active",
+      skills: ["Blockchain", "Solidity", "Web3", "Smart Contracts"],
+      posted: "2024-01-12",
+      description: "Develop decentralized applications and smart contracts.",
+      category: "Blockchain",
+      urgency: "Low",
+      isNew: true
+    },
+    {
+      id: 6,
+      title: "Content Creator Internship",
+      company: "EduTech Media",
+      type: "Internship",
+      location: "Remote",
+      stipend: "₹20,000/month",
+      deadline: "2024-02-08",
+      duration: "3 months",
+      applicants: 52,
+      status: "Active",
+      skills: ["Content Writing", "Video Editing", "Social Media", "SEO"],
+      posted: "2024-01-14",
+      description: "Create engaging educational content for online platforms.",
+      category: "Content & Media",
+      urgency: "Medium",
+      isNew: false
+    },
+    // Popular hackathons and competitions
+    {
+      id: 7,
       title: "Smart India Hackathon 2024",
       company: "Government of India",
       type: "Hackathon",
@@ -101,10 +207,11 @@ const TPOPortal = () => {
       skills: ["Problem Solving", "Innovation", "Team Work", "Presentation"],
       posted: "2024-01-02",
       description: "36-hour hackathon to solve real-world problems using technology. Form teams of 6 members.",
-      category: "Competition"
+      category: "Competition",
+      urgency: "High"
     },
     {
-      id: 5,
+      id: 8,
       title: "Google Summer of Code",
       company: "Google",
       type: "Open Source Program",
@@ -116,10 +223,11 @@ const TPOPortal = () => {
       skills: ["Open Source", "Programming", "Documentation", "Git"],
       posted: "2024-01-01",
       description: "Contribute to open source projects mentored by Google. 12-22 week program.",
-      category: "Open Source"
+      category: "Open Source",
+      urgency: "Medium"
     },
     {
-      id: 6,
+      id: 9,
       title: "Microsoft Imagine Cup",
       company: "Microsoft",
       type: "Global Competition",
@@ -131,85 +239,11 @@ const TPOPortal = () => {
       skills: ["Azure", "AI", "Innovation", "Entrepreneurship"],
       posted: "2024-01-04",
       description: "Global technology competition for students to create solutions that matter.",
-      category: "Competition"
-    },
-    {
-      id: 7,
-      title: "Campus Ambassador Program",
-      company: "TechTalks India",
-      type: "Part-time",
-      location: "On-Campus",
-      stipend: "₹5,000/month + Perks",
-      deadline: "2024-02-28",
-      applicants: 67,
-      status: "Active",
-      skills: ["Marketing", "Communication", "Event Management", "Social Media"],
-      posted: "2024-01-06",
-      description: "Represent TechTalks on campus, organize events, and build tech community.",
-      category: "Ambassador"
-    },
-    {
-      id: 8,
-      title: "Data Science Internship",
-      company: "Analytics Pro",
-      type: "Internship",
-      location: "Chennai",
-      stipend: "₹28,000/month",
-      deadline: "2024-02-05",
-      applicants: 41,
-      status: "Active",
-      skills: ["Python", "R", "SQL", "Data Visualization", "Statistics"],
-      posted: "2024-01-07",
-      description: "Work on real-world data science projects with experienced mentors.",
-      category: "Data Science"
-    },
-    {
-      id: 9,
-      title: "ACM-ICPC Programming Contest",
-      company: "ACM India",
-      type: "Programming Contest",
-      location: "Multiple Venues",
-      stipend: "Certificates + Prizes",
-      deadline: "2024-02-20",
-      applicants: 178,
-      status: "Active",
-      skills: ["Algorithms", "Data Structures", "C++", "Problem Solving"],
-      posted: "2024-01-08",
-      description: "International collegiate programming contest. Team registration required.",
-      category: "Competition"
+      category: "Competition",
+      urgency: "Low"
     },
     {
       id: 10,
-      title: "Cybersecurity Research Intern",
-      company: "SecureNet Labs",
-      type: "Internship",
-      location: "Pune",
-      stipend: "₹32,000/month",
-      deadline: "2024-02-12",
-      applicants: 29,
-      status: "Active",
-      skills: ["Cybersecurity", "Ethical Hacking", "Network Security", "Python"],
-      posted: "2024-01-09",
-      description: "Research emerging cyber threats and develop security solutions.",
-      category: "Security"
-    },
-    {
-      id: 11,
-      title: "Placement Cell Student Coordinator",
-      company: "College Placement Cell",
-      type: "Student Position",
-      location: "On-Campus",
-      stipend: "Certificate + Experience",
-      deadline: "2024-01-30",
-      applicants: 23,
-      status: "Active",
-      skills: ["Leadership", "Communication", "Organization", "Database Management"],
-      posted: "2024-01-10",
-      description: "Assist placement cell in coordinating recruitment drives and student activities.",
-      category: "Campus Role"
-    },
-    {
-      id: 12,
       title: "NASA Space Apps Challenge",
       company: "NASA",
       type: "Global Hackathon",
@@ -221,25 +255,27 @@ const TPOPortal = () => {
       skills: ["Space Technology", "Data Analysis", "Innovation", "Teamwork"],
       posted: "2024-01-11",
       description: "48-hour hackathon to solve challenges related to space exploration and Earth science.",
-      category: "Space Tech"
+      category: "Space Tech",
+      urgency: "Medium"
     },
     {
-      id: 13,
-      title: "Blockchain Developer Intern",
-      company: "CryptoTech Solutions",
-      type: "Internship",
-      location: "Delhi",
-      stipend: "₹35,000/month",
-      deadline: "2024-02-18",
-      applicants: 38,
+      id: 11,
+      title: "ACM-ICPC Programming Contest",
+      company: "ACM India",
+      type: "Programming Contest",
+      location: "Multiple Venues",
+      stipend: "Certificates + Prizes",
+      deadline: "2024-02-20",
+      applicants: 178,
       status: "Active",
-      skills: ["Blockchain", "Solidity", "Web3", "Smart Contracts", "JavaScript"],
-      posted: "2024-01-12",
-      description: "Develop decentralized applications and smart contracts on blockchain platforms.",
-      category: "Blockchain"
+      skills: ["Algorithms", "Data Structures", "C++", "Problem Solving"],
+      posted: "2024-01-08",
+      description: "International collegiate programming contest. Team registration required.",
+      category: "Competition",
+      urgency: "High"
     },
     {
-      id: 14,
+      id: 12,
       title: "TechFest Innovation Challenge",
       company: "IIT Bombay",
       type: "Innovation Contest",
@@ -251,22 +287,8 @@ const TPOPortal = () => {
       skills: ["Innovation", "Technology", "Presentation", "Business Model"],
       posted: "2024-01-13",
       description: "Showcase innovative technology solutions and compete for cash prizes and mentorship.",
-      category: "Innovation"
-    },
-    {
-      id: 15,
-      title: "Content Creator Internship",
-      company: "EduTech Media",
-      type: "Internship",
-      location: "Remote",
-      stipend: "₹20,000/month",
-      deadline: "2024-02-08",
-      applicants: 52,
-      status: "Active",
-      skills: ["Content Writing", "Video Editing", "Social Media", "SEO"],
-      posted: "2024-01-14",
-      description: "Create engaging educational content for online platforms and social media.",
-      category: "Content & Media"
+      category: "Innovation",
+      urgency: "Low"
     }
   ];
 
@@ -501,6 +523,170 @@ const TPOPortal = () => {
     }
   ];
 
+  // Employee data for TPO management
+  const employees = [
+    {
+      id: 1,
+      name: "Sarah Chen",
+      email: "sarah.chen@google.com",
+      company: "Google Inc.",
+      department: "Frontend Engineering",
+      position: "Senior Software Engineer",
+      experience: "5+ years",
+      location: "Bangalore",
+      skills: ["React", "Node.js", "System Design", "TypeScript", "GraphQL", "Microservices"],
+      mentees: 12,
+      activeMentorships: 4,
+      completedSessions: 78,
+      rating: 4.9,
+      joiningDate: "2019-03-15",
+      linkedin_url: "https://linkedin.com/in/sarahchen",
+      specializations: ["Web Development", "System Architecture", "Team Leadership"],
+      availability: "Available",
+      languages: ["English", "Mandarin"]
+    },
+    {
+      id: 2,
+      name: "Rajesh Kumar",
+      email: "rajesh.kumar@microsoft.com",
+      company: "Microsoft Corporation",
+      department: "AI Research",
+      position: "Principal ML Engineer",
+      experience: "8+ years",
+      location: "Hyderabad",
+      skills: ["Python", "Machine Learning", "Deep Learning", "PyTorch", "Azure", "Data Science"],
+      mentees: 18,
+      activeMentorships: 6,
+      completedSessions: 124,
+      rating: 4.8,
+      joiningDate: "2016-07-20",
+      linkedin_url: "https://linkedin.com/in/rajeshkumar",
+      specializations: ["AI/ML", "Data Science", "Research"],
+      availability: "Available",
+      languages: ["English", "Hindi", "Telugu"]
+    },
+    {
+      id: 3,
+      name: "Priya Sharma",
+      email: "priya.sharma@amazon.com",
+      company: "Amazon Web Services",
+      department: "Cloud Infrastructure",
+      position: "DevOps Engineer",
+      experience: "4+ years",
+      location: "Mumbai",
+      skills: ["AWS", "Docker", "Kubernetes", "Terraform", "Jenkins", "Python"],
+      mentees: 8,
+      activeMentorships: 3,
+      completedSessions: 45,
+      rating: 4.7,
+      joiningDate: "2020-01-10",
+      linkedin_url: "https://linkedin.com/in/priyasharma",
+      specializations: ["DevOps", "Cloud Computing", "Infrastructure"],
+      availability: "Busy - Limited slots",
+      languages: ["English", "Hindi"]
+    },
+    {
+      id: 4,
+      name: "Arjun Patel",
+      email: "arjun.patel@meta.com",
+      company: "Meta (Facebook)",
+      department: "Product Engineering",
+      position: "Staff Software Engineer",
+      experience: "7+ years",
+      location: "Bangalore",
+      skills: ["React", "JavaScript", "Python", "GraphQL", "Mobile Development", "Scalability"],
+      mentees: 15,
+      activeMentorships: 5,
+      completedSessions: 89,
+      rating: 4.9,
+      joiningDate: "2017-09-12",
+      linkedin_url: "https://linkedin.com/in/arjunpatel",
+      specializations: ["Product Development", "Full Stack", "Mobile Apps"],
+      availability: "Available",
+      languages: ["English", "Gujarati"]
+    },
+    {
+      id: 5,
+      name: "Ananya Das",
+      email: "ananya.das@netflix.com",
+      company: "Netflix",
+      department: "Data Engineering",
+      position: "Senior Data Engineer",
+      experience: "6+ years",
+      location: "Bangalore",
+      skills: ["Scala", "Apache Spark", "Kafka", "AWS", "Machine Learning", "Big Data"],
+      mentees: 10,
+      activeMentorships: 4,
+      completedSessions: 67,
+      rating: 4.8,
+      joiningDate: "2018-02-28",
+      linkedin_url: "https://linkedin.com/in/ananyadas",
+      specializations: ["Data Engineering", "Big Data", "Streaming"],
+      availability: "Available",
+      languages: ["English", "Bengali"]
+    },
+    {
+      id: 6,
+      name: "Vikram Reddy",
+      email: "vikram.reddy@apple.com",
+      company: "Apple Inc.",
+      department: "iOS Development",
+      position: "Senior iOS Developer",
+      experience: "5+ years",
+      location: "Hyderabad",
+      skills: ["Swift", "Objective-C", "iOS SDK", "Core Data", "SwiftUI", "Xcode"],
+      mentees: 9,
+      activeMentorships: 3,
+      completedSessions: 54,
+      rating: 4.7,
+      joiningDate: "2019-11-05",
+      linkedin_url: "https://linkedin.com/in/vikramreddy",
+      specializations: ["iOS Development", "Mobile Apps", "UI/UX"],
+      availability: "Available",
+      languages: ["English", "Telugu"]
+    },
+    {
+      id: 7,
+      name: "Kavya Nair",
+      email: "kavya.nair@uber.com",
+      company: "Uber Technologies",
+      department: "Backend Engineering",
+      position: "Staff Backend Engineer",
+      experience: "6+ years",
+      location: "Bangalore",
+      skills: ["Go", "Microservices", "PostgreSQL", "Redis", "Kafka", "System Design"],
+      mentees: 14,
+      activeMentorships: 5,
+      completedSessions: 92,
+      rating: 4.9,
+      joiningDate: "2018-06-15",
+      linkedin_url: "https://linkedin.com/in/kavyanair",
+      specializations: ["Backend Development", "System Design", "Distributed Systems"],
+      availability: "Available",
+      languages: ["English", "Malayalam"]
+    },
+    {
+      id: 8,
+      name: "Rohit Gupta",
+      email: "rohit.gupta@salesforce.com",
+      company: "Salesforce",
+      department: "Product Management",
+      position: "Senior Product Manager",
+      experience: "7+ years",
+      location: "Mumbai",
+      skills: ["Product Strategy", "Data Analytics", "User Research", "Agile", "Roadmapping", "Stakeholder Management"],
+      mentees: 11,
+      activeMentorships: 4,
+      completedSessions: 73,
+      rating: 4.8,
+      joiningDate: "2017-04-22",
+      linkedin_url: "https://linkedin.com/in/rohitgupta",
+      specializations: ["Product Management", "Strategy", "Analytics"],
+      availability: "Available",
+      languages: ["English", "Hindi"]
+    }
+  ];
+
   const analyticsData = {
     totalApplications: 1847,
     totalInterviews: 289,
@@ -545,6 +731,13 @@ const TPOPortal = () => {
 
   const handleViewStudentProfile = (student: any) => {
     setSelectedStudent(student);
+  };
+
+  const handleViewEmployeeProfile = (employee: any) => {
+    toast({
+      title: "Employee Profile",
+      description: `Viewing profile for ${employee.name} from ${employee.company}`,
+    });
   };
 
   const getFilteredOpportunities = () => {
@@ -616,46 +809,78 @@ const TPOPortal = () => {
                   <Settings className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-foreground">Admin Portal</h1>
-                  <p className="text-sm text-muted-foreground">Placement Control Center</p>
+                  <h1 className="text-xl font-bold text-foreground">{getPortalTitle()}</h1>
+                  <p className="text-sm text-muted-foreground">{getPortalSubtitle()}</p>
                 </div>
               </div>
             </div>
-            <Badge className="bg-campus-secondary text-white">
-              <Target className="w-4 h-4 mr-1" />
-              Administrator
-            </Badge>
+            <div className="flex items-center gap-2">
+              {isTPOUser && (
+                <Badge className="bg-campus-secondary text-white">
+                  <Target className="w-4 h-4 mr-1" />
+                  Administrator
+                </Badge>
+              )}
+              {isStudentOrEmployee && (
+                <Badge className="bg-blue-100 text-blue-800">
+                  {userProfile?.role === 'student' ? 'Student' : 'Employee'} Access
+                </Badge>
+              )}
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Dashboard
-            </TabsTrigger>
+        <Tabs defaultValue="opportunities" className="w-full">
+          <TabsList className={`grid w-full ${isTPOUser ? 'grid-cols-6' : 'grid-cols-2'} mb-6`}>
+            {/* Always show Opportunities tab */}
             <TabsTrigger value="opportunities" className="flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
               Opportunities
             </TabsTrigger>
-            <TabsTrigger value="students" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Students
-            </TabsTrigger>
+            
+            {/* Always show Companies tab */}
             <TabsTrigger value="companies" className="flex items-center gap-2">
               <Building className="w-4 h-4" />
               Companies
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Analytics
-            </TabsTrigger>
+
+            {/* Only show these tabs for TPO users */}
+            {isTPOUser && (
+              <>
+                <TabsTrigger value="dashboard" className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Dashboard
+                </TabsTrigger>
+                
+                <TabsTrigger value="students" className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Students
+                </TabsTrigger>
+                
+                <TabsTrigger value="employees" className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Employees
+                </TabsTrigger>
+                
+                <TabsTrigger value="analytics" className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Analytics
+                </TabsTrigger>
+              </>
+            )}
           </TabsList>
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard">
+          {/* TPO-Only Tabs */}
+          {isTPOUser && (
+            <>
+              {/* Dashboard Tab - TPO Only */}
+              <TabsContent value="dashboard">
             <div className="space-y-6">
               <Card className="border-0 bg-gradient-secondary text-white">
                 <CardHeader>
@@ -792,21 +1017,30 @@ const TPOPortal = () => {
             </div>
           </TabsContent>
 
-          {/* Opportunities Tab */}
+          {/* Opportunities Tab - Always Available */}
           <TabsContent value="opportunities">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-2xl font-bold">Manage Opportunities</h2>
-                  <p className="text-muted-foreground">Post and manage internships, hackathons, competitions, and job opportunities</p>
+                  <h2 className="text-2xl font-bold">
+                    {isTPOUser ? 'Manage Opportunities' : 'Browse Opportunities'}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {isTPOUser 
+                      ? 'Post and manage internships, hackathons, competitions, and job opportunities'
+                      : 'Explore available internships, jobs, hackathons, and opportunities'
+                    }
+                  </p>
                 </div>
-                <Button 
-                  variant="tpo" 
-                  onClick={() => setIsAddingOpportunity(true)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Opportunity
-                </Button>
+                {isTPOUser && (
+                  <Button 
+                    variant="tpo" 
+                    onClick={() => setIsAddingOpportunity(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Opportunity
+                  </Button>
+                )}
               </div>
 
               {/* Filter Section */}
@@ -869,9 +1103,71 @@ const TPOPortal = () => {
                     Research ({getFilterCount("research")})
                   </Button>
                 </div>
+                
+                {/* Quick stats for students/employees */}
+                {isStudentOrEmployee && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="w-4 h-4 text-blue-600" />
+                      <span className="font-medium text-blue-900">Available Opportunities</span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                      <div className="text-center">
+                        <div className="font-bold text-blue-600">{getFilterCount("internships")}</div>
+                        <div className="text-blue-700">Internships</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-purple-600">{getFilterCount("hackathons")}</div>
+                        <div className="text-purple-700">Hackathons</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-green-600">{getFilterCount("competitions")}</div>
+                        <div className="text-green-700">Competitions</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-orange-600">{getFilterCount("all")}</div>
+                        <div className="text-orange-700">Total</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </Card>
 
-              {isAddingOpportunity && (
+              {/* Featured Opportunities for Students/Employees */}
+              {isStudentOrEmployee && selectedFilter === "all" && (
+                <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-blue-900">
+                      <Star className="w-5 h-5 text-yellow-500" />
+                      Featured Opportunities
+                    </CardTitle>
+                    <CardDescription className="text-blue-700">
+                      Don't miss these popular opportunities with high demand!
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 bg-white rounded-lg border">
+                        <h4 className="font-semibold text-sm mb-1">🏆 Smart India Hackathon 2024</h4>
+                        <p className="text-xs text-muted-foreground mb-2">Government of India • ₹1,00,000 Prize</p>
+                        <Badge variant="secondary" className="text-xs">156 Applications</Badge>
+                      </div>
+                      <div className="p-4 bg-white rounded-lg border">
+                        <h4 className="font-semibold text-sm mb-1">💻 Google Summer of Code</h4>
+                        <p className="text-xs text-muted-foreground mb-2">Google • $3,000-$6,600</p>
+                        <Badge variant="secondary" className="text-xs">89 Applications</Badge>
+                      </div>
+                      <div className="p-4 bg-white rounded-lg border">
+                        <h4 className="font-semibold text-sm mb-1">🚀 NASA Space Apps Challenge</h4>
+                        <p className="text-xs text-muted-foreground mb-2">NASA • Global Recognition</p>
+                        <Badge variant="secondary" className="text-xs">312 Applications</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {isAddingOpportunity && isTPOUser && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Create New Opportunity</CardTitle>
@@ -962,7 +1258,88 @@ const TPOPortal = () => {
                 </Card>
               )}
 
-              <div className="grid gap-4">
+              {/* Internship Spotlight Section */}
+              {(selectedFilter === "all" || selectedFilter === "internships") && (
+                <Card className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 shadow-xl">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 text-2xl">
+                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <Users className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <span>Featured Internships</span>
+                        <p className="text-blue-100 text-sm font-normal mt-1">
+                          Premium opportunities for talented students
+                        </p>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {getFilteredOpportunities()
+                        .filter(opp => opp.type === 'Internship')
+                        .slice(0, 6)
+                        .map((internship) => (
+                        <div key={internship.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-bold text-lg text-white mb-1">{internship.title}</h4>
+                              <p className="text-blue-100 text-sm font-medium">{internship.company}</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white font-bold text-lg">{internship.stipend}</div>
+                              {internship.duration && (
+                                <div className="text-blue-100 text-xs">{internship.duration}</div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 text-blue-100 text-sm mb-3">
+                            <MapPin className="w-4 h-4" />
+                            <span>{internship.location}</span>
+                            <span>•</span>
+                            <Users className="w-4 h-4" />
+                            <span>{internship.applicants} applied</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {internship.skills.slice(0, 3).map((skill, idx) => (
+                              <span key={idx} className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
+                                {skill}
+                              </span>
+                            ))}
+                            {internship.skills.length > 3 && (
+                              <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
+                                +{internship.skills.length - 3}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            {isTPOUser ? (
+                              <Button size="sm" variant="outline" className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
+                                <Eye className="w-4 h-4 mr-2" />
+                                Manage
+                              </Button>
+                            ) : (
+                              <Button size="sm" className="flex-1 bg-white text-blue-600 hover:bg-blue-50">
+                                <Target className="w-4 h-4 mr-2" />
+                                Apply Now
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {getFilteredOpportunities().filter(opp => opp.type === 'Internship').length === 0 && (
+                      <div className="text-center text-blue-100 py-8">
+                        <Users className="w-12 h-12 mx-auto mb-4 opacity-60" />
+                        <p className="text-lg">No internships available at the moment</p>
+                        <p className="text-sm opacity-80">Check back soon for new opportunities!</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="grid gap-6">
                 {getFilteredOpportunities().length === 0 ? (
                   <Card className="p-8 text-center">
                     <div className="text-muted-foreground">
@@ -973,64 +1350,149 @@ const TPOPortal = () => {
                   </Card>
                 ) : (
                   getFilteredOpportunities().map((opportunity) => (
-                  <Card key={opportunity.id} className="hover:shadow-medium transition-spring">
-                    <CardHeader>
+                  <Card key={opportunity.id} className={`hover:shadow-lg transition-all duration-300 border-l-4 ${
+                    opportunity.type === 'Internship' 
+                      ? 'border-l-blue-500 bg-gradient-to-r from-blue-50/30 to-transparent' 
+                      : opportunity.type.includes('Hackathon') 
+                      ? 'border-l-purple-500 bg-gradient-to-r from-purple-50/30 to-transparent'
+                      : opportunity.type.includes('Competition') 
+                      ? 'border-l-yellow-500 bg-gradient-to-r from-yellow-50/30 to-transparent'
+                      : 'border-l-campus-primary bg-gradient-to-r from-gray-50/30 to-transparent'
+                  }`}>
+                    <CardHeader className="pb-4">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <CardTitle className="text-xl">{opportunity.title}</CardTitle>
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                              opportunity.type === 'Internship' 
+                                ? 'bg-blue-100 text-blue-600' 
+                                : opportunity.type.includes('Hackathon') 
+                                ? 'bg-purple-100 text-purple-600'
+                                : opportunity.type.includes('Competition') 
+                                ? 'bg-yellow-100 text-yellow-600'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {opportunity.type === 'Hackathon' || opportunity.type === 'Global Hackathon' ? (
+                                <Briefcase className="w-6 h-6" />
+                              ) : opportunity.type === 'Internship' ? (
+                                <Users className="w-6 h-6" />
+                              ) : opportunity.type.includes('Competition') || opportunity.type === 'Programming Contest' ? (
+                                <Star className="w-6 h-6" />
+                              ) : opportunity.type === 'Open Source Program' ? (
+                                <Building className="w-6 h-6" />
+                              ) : (
+                                <Briefcase className="w-6 h-6" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <CardTitle className="text-xl text-gray-900 mb-1">{opportunity.title}</CardTitle>
+                              <p className="text-sm font-medium text-blue-600">{opportunity.company}</p>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide">{opportunity.type}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
                             <Badge className={getStatusColor(opportunity.status)}>
                               {opportunity.status}
                             </Badge>
-                            <Badge variant="outline" className="bg-campus-primary/10 text-campus-primary border-campus-primary">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                               {opportunity.category}
                             </Badge>
+                            {opportunity.urgency && (
+                              <Badge variant={opportunity.urgency === 'High' ? 'destructive' : opportunity.urgency === 'Medium' ? 'default' : 'secondary'}>
+                                {opportunity.urgency} Priority
+                              </Badge>
+                            )}
+                            {isStudentOrEmployee && opportunity.type === 'Internship' && (
+                              <Badge className="bg-green-100 text-green-800 border-green-200">
+                                🔥 Featured
+                              </Badge>
+                            )}
                           </div>
-                          <div className="flex items-center gap-4 text-muted-foreground mb-3">
-                            <span className="font-semibold text-foreground">{opportunity.company}</span>
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {opportunity.location}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Users className="w-4 h-4" />
-                              {opportunity.applicants} applicants
-                            </span>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <MapPin className="w-4 h-4 text-blue-500" />
+                              <span className="font-medium">{opportunity.location}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Users className="w-4 h-4 text-green-500" />
+                              <span className="font-medium">{opportunity.applicants} applicants</span>
+                            </div>
+                            {opportunity.duration && (
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <Clock className="w-4 h-4 text-orange-500" />
+                                <span className="font-medium">{opportunity.duration}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Calendar className="w-4 h-4 text-red-500" />
+                              <span className="font-medium text-red-600">{opportunity.deadline}</span>
+                            </div>
                           </div>
-                          <p className="text-muted-foreground mb-3">{opportunity.description}</p>
+                          
+                          <p className="text-sm text-gray-700 mb-4 leading-relaxed">{opportunity.description}</p>
+                          
                           <div className="flex flex-wrap gap-2">
                             {opportunity.skills.map((skill, index) => (
-                              <Badge key={index} variant="secondary">
+                              <Badge key={index} variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 transition-colors">
                                 {skill}
                               </Badge>
                             ))}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-lg font-semibold text-success">{opportunity.stipend}</div>
-                          <div className="text-sm text-muted-foreground">Deadline: {opportunity.deadline}</div>
+                        <div className="text-right ml-4">
+                          <div className={`text-xl font-bold mb-2 ${
+                            opportunity.type === 'Internship' ? 'text-green-600' : 'text-blue-600'
+                          }`}>
+                            💰 {opportunity.stipend}
+                          </div>
+                          {isStudentOrEmployee && (
+                            <div className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded-full">
+                              ⏰ {Math.ceil((new Date(opportunity.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days left
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex gap-3">
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Applications ({opportunity.applicants})
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleDeleteOpportunity(opportunity.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </Button>
+                    <CardContent className="pt-0">
+                      <div className="flex gap-3 flex-wrap">
+                        {isTPOUser ? (
+                          <>
+                            <Button variant="outline" size="sm" className="flex-1 min-w-fit">
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Applications ({opportunity.applicants})
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteOpportunity(opportunity.id)}
+                              className="text-destructive hover:text-destructive hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                              <Target className="w-4 h-4 mr-2" />
+                              Apply Now
+                            </Button>
+                            <Button variant="outline" size="sm" className="hover:bg-blue-50">
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Details
+                            </Button>
+                            <Button variant="outline" size="sm" className="hover:bg-orange-50">
+                              <Calendar className="w-4 h-4 mr-2" />
+                              Save for Later
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -1123,26 +1585,251 @@ const TPOPortal = () => {
             </div>
           </TabsContent>
 
-          {/* Companies Tab */}
+          {/* Employees Tab - TPO Only */}
+          <TabsContent value="employees">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">Employee Management</h2>
+                  <p className="text-muted-foreground">Monitor employee mentors and their contributions</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline">
+                    <Filter className="w-4 h-4 mr-2" />
+                    Filter
+                  </Button>
+                  <Button variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Data
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {employees.map((employee) => (
+                  <Card key={employee.id} className="hover:shadow-soft transition-smooth">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <CardTitle className="text-lg">{employee.name}</CardTitle>
+                            <Badge variant="outline">{employee.availability}</Badge>
+                            <Badge variant="secondary">{employee.experience}</Badge>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-3">
+                            <span>📧 {employee.email}</span>
+                            <span>🏢 {employee.company}</span>
+                            <span>📊 {employee.department}</span>
+                            <span>💼 {employee.position}</span>
+                            <span>📍 {employee.location}</span>
+                            <span>🗓️ Joined: {new Date(employee.joiningDate).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {employee.skills.slice(0, 4).map((skill, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {employee.skills.length > 4 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{employee.skills.length - 4} more
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {employee.specializations.map((spec, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {spec}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <div className="flex gap-4 text-sm">
+                            <span className="text-info">👥 {employee.mentees} Total Mentees</span>
+                            <span className="text-success">✅ {employee.activeMentorships} Active</span>
+                          </div>
+                          <div className="flex gap-4 text-sm">
+                            <span className="text-purple-600">📚 {employee.completedSessions} Sessions</span>
+                            <span className="text-yellow-600">⭐ {employee.rating} Rating</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-3">
+                        <Button variant="outline" size="sm" onClick={() => handleViewEmployeeProfile(employee)}>
+                          <FileText className="w-4 h-4 mr-2" />
+                          View Profile
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4 mr-2" />
+                          Mentorship History
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Users className="w-4 h-4 mr-2" />
+                          Current Mentees
+                        </Button>
+                        <Button variant="tpo" size="sm">
+                          <UserCheck className="w-4 h-4 mr-2" />
+                          Assign Students
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Companies Tab - Always Available */}
           <TabsContent value="companies">
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building className="w-5 h-5" />
-                    Company Management
-                  </CardTitle>
-                  <CardDescription>
-                    Manage company partnerships and recruitment drives
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Building className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Company management features coming soon...</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    {isTPOUser ? 'Company Management' : 'Browse Companies'}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {isTPOUser 
+                      ? 'Manage company partnerships and recruitment drives'
+                      : 'Explore companies and their profiles'
+                    }
+                  </p>
+                </div>
+                {isTPOUser && (
+                  <Button className="bg-campus-primary hover:bg-campus-primary/90">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Company
+                  </Button>
+                )}
+              </div>
+
+              {isTPOUser ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building className="w-5 h-5" />
+                      Company Management
+                    </CardTitle>
+                    <CardDescription>
+                      Manage company partnerships and recruitment drives
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Building className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Company management features coming soon...</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Building className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">TechCorp Solutions</h3>
+                          <p className="text-sm text-muted-foreground">Technology</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Leading software development company specializing in web applications and mobile solutions.</p>
+                      <div className="flex gap-2 mb-4">
+                        <Badge variant="outline">React</Badge>
+                        <Badge variant="outline">Node.js</Badge>
+                        <Badge variant="outline">Cloud</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-4">
+                        📍 Bangalore • 500+ employees • 12 open positions
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full">
+                        View Company Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Building className="w-6 h-6 text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">DataSense Labs</h3>
+                          <p className="text-sm text-muted-foreground">Research & AI</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Cutting-edge AI research lab focusing on machine learning and data science innovations.</p>
+                      <div className="flex gap-2 mb-4">
+                        <Badge variant="outline">Python</Badge>
+                        <Badge variant="outline">TensorFlow</Badge>
+                        <Badge variant="outline">Research</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-4">
+                        📍 Hyderabad • 200+ employees • 8 open positions
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full">
+                        View Company Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Building className="w-6 h-6 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Google Inc.</h3>
+                          <p className="text-sm text-muted-foreground">Technology Giant</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Global technology leader in search, cloud computing, and artificial intelligence.</p>
+                      <div className="flex gap-2 mb-4">
+                        <Badge variant="outline">Go</Badge>
+                        <Badge variant="outline">Kubernetes</Badge>
+                        <Badge variant="outline">AI</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-4">
+                        📍 Mountain View • 100,000+ employees • 25 open positions
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full">
+                        View Company Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                          <Building className="w-6 h-6 text-red-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Microsoft Corporation</h3>
+                          <p className="text-sm text-muted-foreground">Cloud & Software</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Leading provider of cloud services, productivity software, and enterprise solutions.</p>
+                      <div className="flex gap-2 mb-4">
+                        <Badge variant="outline">Azure</Badge>
+                        <Badge variant="outline">C#</Badge>
+                        <Badge variant="outline">Cloud</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-4">
+                        📍 Redmond • 220,000+ employees • 18 open positions
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full">
+                        View Company Profile
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -1168,6 +1855,8 @@ const TPOPortal = () => {
               </Card>
             </div>
           </TabsContent>
+            </>
+          )}
         </Tabs>
       </div>
 
