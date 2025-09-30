@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Users, Zap, ArrowLeft, Edit, Mail, Phone, Calendar, GraduationCap, User, Save, X, Loader2 } from "lucide-react";
+import { Brain, Users, Zap, ArrowLeft, Edit, Mail, Phone, Calendar, GraduationCap, User, Save, X, Loader2, LogOut, Building, Award, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,22 +13,114 @@ import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, userProfile, updateProfile } = useAuth();
+  const { user, userProfile, updateProfile, signOut } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [editData, setEditData] = useState({
+
+  // Always use latest userProfile except for TPO test account
+  const displayProfile = (user?.email === 'tpo@gmail.com') ? {
+    full_name: 'Microsoft Corporation',
+    email: 'tpo@gmail.com',
+    role: 'tpo',
+    phone_number: '+1 (425) 882-8080',
+    company_name: 'Microsoft Corporation',
+    global_ranking: 'Fortune 21 - Global Technology Leader',
+    company_type: 'mnc',
+    industry_type: 'technology',
+    company_website: 'https://www.microsoft.com',
+    ceo_name: 'Satya Nadella',
+    ceo_email: 'satya.nadella@microsoft.com',
+    ceo_linkedin: 'https://linkedin.com/in/satyanadella',
+    executive_position: 'ceo',
+    years_of_experience: 30,
+    education_background: 'MS Computer Science - University of Wisconsin, MBA - University of Chicago',
+    founded_year: 1975,
+    headquarters_location: 'Redmond, Washington, USA',
+    employees_count: 220000,
+    opportunities_posted: 156,
+    students_hired: 89,
+    employees_recruited: 45,
+    can_access_students: true,
+    can_access_employees: true,
+    can_post_opportunities: true,
+    can_conduct_hackathons: true,
+    can_view_analytics: true,
+    access_level: 'full_admin',
+    is_active: true
+  } : userProfile;
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  type EditDataType = {
+    full_name: string;
+    email: string;
+    phone_number: string;
+    student_id: string;
+    university: string;
+    course: string;
+    graduation_year: string;
+    skills: string;
+    linkedin_url: string;
+    github_url: string;
+    portfolio_url: string;
+    // Employee extra fields
+    workplace: string;
+    age: string;
+    university_graduated: string;
+    work_experience: string;
+    // TPO fields
+    company_name: string;
+    global_ranking: string;
+    ceo_name: string;
+    ceo_email: string;
+    ceo_linkedin: string;
+    executive_position: string;
+    years_of_experience: string;
+    education_background: string;
+    company_website: string;
+    headquarters_location: string;
+  };
+
+  const [editData, setEditData] = useState<EditDataType>({
     full_name: userProfile?.full_name || '',
     email: userProfile?.email || '',
     phone_number: userProfile?.phone_number || '',
-    student_id: userProfile?.student_id || '',
-    university: userProfile?.university || '',
-    course: userProfile?.course || '',
-    graduation_year: userProfile?.graduation_year?.toString() || '',
-    skills: userProfile?.skills ? userProfile.skills.join(', ') : '',
-    linkedin_url: userProfile?.linkedin_url || '',
-    github_url: userProfile?.github_url || '',
-    portfolio_url: userProfile?.portfolio_url || ''
+    student_id: (userProfile as any)?.student_id || '',
+    university: (userProfile as any)?.university || '',
+    course: (userProfile as any)?.course || '',
+    graduation_year: (userProfile as any)?.graduation_year?.toString() || '',
+    skills: (userProfile as any)?.skills ? (userProfile as any).skills.join(', ') : '',
+    linkedin_url: (userProfile as any)?.linkedin_url || '',
+    github_url: (userProfile as any)?.github_url || '',
+    portfolio_url: (userProfile as any)?.portfolio_url || '',
+    // Employee extra fields
+    workplace: (userProfile as any)?.workplace || '',
+    age: (userProfile as any)?.age || '',
+    university_graduated: (userProfile as any)?.university_graduated || '',
+    work_experience: (userProfile as any)?.work_experience || '',
+    // TPO fields
+    company_name: (userProfile as any)?.company_name || '',
+    global_ranking: (userProfile as any)?.global_ranking || '',
+    ceo_name: (userProfile as any)?.ceo_name || '',
+    ceo_email: (userProfile as any)?.ceo_email || '',
+    ceo_linkedin: (userProfile as any)?.ceo_linkedin || '',
+    executive_position: (userProfile as any)?.executive_position || '',
+    years_of_experience: (userProfile as any)?.years_of_experience?.toString() || '',
+    education_background: (userProfile as any)?.education_background || '',
+    company_website: (userProfile as any)?.company_website || '',
+    headquarters_location: (userProfile as any)?.headquarters_location || ''
   });
 
   // Course options (same as registration)
@@ -58,14 +149,30 @@ const Profile = () => {
         full_name: userProfile.full_name || '',
         email: userProfile.email || '',
         phone_number: userProfile.phone_number || '',
-        student_id: userProfile.student_id || '',
-        university: userProfile.university || '',
-        course: userProfile.course || '',
-        graduation_year: userProfile.graduation_year?.toString() || '',
-        skills: userProfile.skills ? userProfile.skills.join(', ') : '',
-        linkedin_url: userProfile.linkedin_url || '',
-        github_url: userProfile.github_url || '',
-        portfolio_url: userProfile.portfolio_url || ''
+        student_id: (userProfile as any)?.student_id || '',
+        university: (userProfile as any)?.university || '',
+        course: (userProfile as any)?.course || '',
+        graduation_year: (userProfile as any)?.graduation_year?.toString() || '',
+        skills: (userProfile as any)?.skills ? (userProfile as any).skills.join(', ') : '',
+        linkedin_url: (userProfile as any)?.linkedin_url || '',
+        github_url: (userProfile as any)?.github_url || '',
+        portfolio_url: (userProfile as any)?.portfolio_url || '',
+        // Employee extra fields
+        workplace: (userProfile as any)?.workplace || '',
+        age: (userProfile as any)?.age || '',
+        university_graduated: (userProfile as any)?.university_graduated || '',
+        work_experience: (userProfile as any)?.work_experience || '',
+        // TPO fields
+        company_name: (userProfile as any)?.company_name || '',
+        global_ranking: (userProfile as any)?.global_ranking || '',
+        ceo_name: (userProfile as any)?.ceo_name || '',
+        ceo_email: (userProfile as any)?.ceo_email || '',
+        ceo_linkedin: (userProfile as any)?.ceo_linkedin || '',
+        executive_position: (userProfile as any)?.executive_position || '',
+        years_of_experience: (userProfile as any)?.years_of_experience?.toString() || '',
+        education_background: (userProfile as any)?.education_background || '',
+        company_website: (userProfile as any)?.company_website || '',
+        headquarters_location: (userProfile as any)?.headquarters_location || ''
       });
     }
   }, [userProfile]);
@@ -126,17 +233,33 @@ const Profile = () => {
     // Reset form data to current userProfile values
     if (userProfile) {
       setEditData({
-        full_name: userProfile.full_name || '',
-        email: userProfile.email || '',
-        phone_number: userProfile.phone_number || '',
-        student_id: userProfile.student_id || '',
-        university: userProfile.university || '',
-        course: userProfile.course || '',
-        graduation_year: userProfile.graduation_year?.toString() || '',
-        skills: userProfile.skills ? userProfile.skills.join(', ') : '',
-        linkedin_url: userProfile.linkedin_url || '',
-        github_url: userProfile.github_url || '',
-        portfolio_url: userProfile.portfolio_url || ''
+        full_name: userProfile?.full_name || '',
+        email: userProfile?.email || '',
+        phone_number: userProfile?.phone_number || '',
+        student_id: (userProfile as any)?.student_id || '',
+        university: (userProfile as any)?.university || '',
+        course: (userProfile as any)?.course || '',
+        graduation_year: (userProfile as any)?.graduation_year?.toString() || '',
+        skills: (userProfile as any)?.skills ? (userProfile as any).skills.join(', ') : '',
+        linkedin_url: (userProfile as any)?.linkedin_url || '',
+        github_url: (userProfile as any)?.github_url || '',
+        portfolio_url: (userProfile as any)?.portfolio_url || '',
+        // Employee extra fields
+        workplace: (userProfile as any)?.workplace || '',
+        age: (userProfile as any)?.age || '',
+        university_graduated: (userProfile as any)?.university_graduated || '',
+        work_experience: (userProfile as any)?.work_experience || '',
+        // TPO fields
+        company_name: (userProfile as any)?.company_name || '',
+        global_ranking: (userProfile as any)?.global_ranking || '',
+        ceo_name: (userProfile as any)?.ceo_name || '',
+        ceo_email: (userProfile as any)?.ceo_email || '',
+        ceo_linkedin: (userProfile as any)?.ceo_linkedin || '',
+        executive_position: (userProfile as any)?.executive_position || '',
+        years_of_experience: (userProfile as any)?.years_of_experience?.toString() || '',
+        education_background: (userProfile as any)?.education_background || '',
+        company_website: (userProfile as any)?.company_website || '',
+        headquarters_location: (userProfile as any)?.headquarters_location || ''
       });
     }
     setIsEditing(false);
@@ -200,9 +323,9 @@ const Profile = () => {
           {/* Profile Header Card */}
           <Card className="mb-8 overflow-hidden shadow-medium">
             <CardHeader className="bg-gradient-primary text-white relative">
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 right-4 flex gap-2">
                 {isEditing ? (
-                  <div className="flex gap-2">
+                  <>
                     <Button variant="secondary" size="sm" onClick={handleSave} disabled={isLoading}>
                       {isLoading ? (
                         <>
@@ -220,25 +343,141 @@ const Profile = () => {
                       <X className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
-                  </div>
+                  </>
                 ) : (
-                  <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Profile
-                  </Button>
+                  <>
+                    {displayProfile?.role !== 'tpo' && (
+                      <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    )}
+                    <Button variant="destructive" size="sm" onClick={handleLogout}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
+                    </Button>
+                  </>
                 )}
-              </div>
-              <div className="flex items-center gap-6">
+              </div>  
+              <div className="flex items-center gap-6 mt-16">
                 <Avatar className="h-24 w-24 border-4 border-white/20">
-                  <AvatarImage src={userProfile?.resume_url} alt={userProfile?.full_name} />
                   <AvatarFallback className="text-2xl bg-white/20 text-white">
-                    {getUserInitials()}
+                    {displayProfile?.role === 'tpo' ? 
+                      <Building className="w-12 h-12" /> : 
+                      getUserInitials()
+                    }
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">{userProfile?.full_name}</h2>
-                  <p className="text-white/90 text-lg mb-1">{userProfile?.course}</p>
-                  <p className="text-white/80">{userProfile?.university}</p>
+                  <h2 className="text-3xl font-bold mb-2">{displayProfile?.full_name}</h2>
+                  {displayProfile?.role === 'tpo' ? (
+                    <>
+                      <p className="text-white/90 text-lg mb-1">
+                        {displayProfile?.industry_type?.charAt(0).toUpperCase() + displayProfile?.industry_type?.slice(1)} Company
+                      </p>
+                      <p className="text-white/80">{displayProfile?.global_ranking}</p>
+                    </>
+                  ) : displayProfile?.role === 'employee' ? (
+                    <>
+                      <div className="text-white/90 text-lg mb-1">Workplace: {(displayProfile as any)?.workplace}</div>
+                      <div className="text-white/90 text-lg mb-1">Age: {(displayProfile as any)?.age}</div>
+                      <div className="text-white/90 text-lg mb-1">University Graduated: {(displayProfile as any)?.university_graduated}</div>
+                      <div className="text-white/90 text-lg mb-1">Work Experience: {(displayProfile as any)?.work_experience} years</div>
+                      {/* Achievements */}
+                      {(displayProfile as any)?.achievements && Array.isArray((displayProfile as any).achievements) && (displayProfile as any).achievements.length > 0 && (
+                        <div className="mt-2">
+                          <div className="font-semibold text-white">Achievements:</div>
+                          <ul className="list-disc ml-6 text-white/90">
+                            {(displayProfile as any).achievements.map((ach: string, idx: number) => (
+                              <li key={idx}>{ach}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {/* Skills */}
+                      <div className="mt-2">
+                        <div className="font-semibold text-white">Skills:</div>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {typeof (displayProfile as any)?.skills === 'string'
+                            ? (displayProfile as any).skills.split(',').map((skill: string, idx: number) => (
+                                <span key={idx} className="bg-purple-700 text-white px-2 py-1 rounded text-xs">{skill.trim()}</span>
+                              ))
+                            : Array.isArray((displayProfile as any)?.skills)
+                              ? (displayProfile as any).skills.map((skill: string, idx: number) => (
+                                  <span key={idx} className="bg-purple-700 text-white px-2 py-1 rounded text-xs">{skill.trim()}</span>
+                                ))
+                              : null}
+                        </div>
+                      </div>
+                      {/* Professional Links */}
+                      <div className="mt-2 flex gap-2">
+                        {(displayProfile as any)?.github_url && (
+                          <a href={(displayProfile as any).github_url} target="_blank" rel="noopener noreferrer">
+                            <button className="bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-900">GitHub</button>
+                          </a>
+                        )}
+                        {(displayProfile as any)?.linkedin_url && (
+                          <a href={(displayProfile as any).linkedin_url} target="_blank" rel="noopener noreferrer">
+                            <button className="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800">LinkedIn</button>
+                          </a>
+                        )}
+                        {(displayProfile as any)?.portfolio_url && (
+                          <a href={(displayProfile as any).portfolio_url} target="_blank" rel="noopener noreferrer">
+                            <button className="bg-purple-700 text-white px-3 py-1 rounded hover:bg-purple-800">Portfolio</button>
+                          </a>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-white/90 text-lg mb-1">{(displayProfile as any)?.course}</p>
+                      <p className="text-white/80">{(displayProfile as any)?.university}</p>
+                      {/* Achievements */}
+                      {(displayProfile as any)?.achievements && Array.isArray((displayProfile as any).achievements) && (displayProfile as any).achievements.length > 0 && (
+                        <div className="mt-2">
+                          <div className="font-semibold text-white">Achievements:</div>
+                          <ul className="list-disc ml-6 text-white/90">
+                            {(displayProfile as any).achievements.map((ach: string, idx: number) => (
+                              <li key={idx}>{ach}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {/* Skills */}
+                      <div className="mt-2">
+                        <div className="font-semibold text-white">Skills:</div>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {typeof (displayProfile as any)?.skills === 'string'
+                            ? (displayProfile as any).skills.split(',').map((skill: string, idx: number) => (
+                                <span key={idx} className="bg-purple-700 text-white px-2 py-1 rounded text-xs">{skill.trim()}</span>
+                              ))
+                            : Array.isArray((displayProfile as any)?.skills)
+                              ? (displayProfile as any).skills.map((skill: string, idx: number) => (
+                                  <span key={idx} className="bg-purple-700 text-white px-2 py-1 rounded text-xs">{skill.trim()}</span>
+                                ))
+                              : null}
+                        </div>
+                      </div>
+                      {/* Professional Links */}
+                      <div className="mt-2 flex gap-2">
+                        {(displayProfile as any)?.github_url && (
+                          <a href={(displayProfile as any).github_url} target="_blank" rel="noopener noreferrer">
+                            <button className="bg-gray-800 text-white px-3 py-1 rounded hover:bg-gray-900">GitHub</button>
+                          </a>
+                        )}
+                        {(displayProfile as any)?.linkedin_url && (
+                          <a href={(displayProfile as any).linkedin_url} target="_blank" rel="noopener noreferrer">
+                            <button className="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800">LinkedIn</button>
+                          </a>
+                        )}
+                        {(displayProfile as any)?.portfolio_url && (
+                          <a href={(displayProfile as any).portfolio_url} target="_blank" rel="noopener noreferrer">
+                            <button className="bg-purple-700 text-white px-3 py-1 rounded hover:bg-purple-800">Portfolio</button>
+                          </a>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -280,59 +519,58 @@ const Profile = () => {
                         placeholder="Enter your phone number"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="student_id">Student ID</Label>
-                      <Input
-                        id="student_id"
-                        value={editData.student_id}
-                        onChange={(e) => handleEditChange('student_id', e.target.value)}
-                        placeholder="Enter your student ID"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Academic Information */}
-                  <div className="space-y-2">
-                    <Label htmlFor="university">University *</Label>
-                    <Input
-                      id="university"
-                      value={editData.university}
-                      onChange={(e) => handleEditChange('university', e.target.value)}
-                      placeholder="Enter your university name"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="course">Course *</Label>
-                      <Select value={editData.course} onValueChange={(value) => handleEditChange('course', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your course" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {courses.map((course) => (
-                            <SelectItem key={course} value={course}>
-                              {course}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="graduation_year">Graduation Year</Label>
-                      <Select value={editData.graduation_year} onValueChange={(value) => handleEditChange('graduation_year', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select graduation year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {graduationYears.map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {displayProfile?.role === 'employee' ? (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="workplace">Workplace</Label>
+                          <Input
+                            id="workplace"
+                            value={editData.workplace || ''}
+                            onChange={(e) => handleEditChange('workplace', e.target.value)}
+                            placeholder="Enter your workplace/company"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="age">Age</Label>
+                          <Input
+                            id="age"
+                            type="number"
+                            value={editData.age || ''}
+                            onChange={(e) => handleEditChange('age', e.target.value)}
+                            placeholder="Enter your age"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="university_graduated">Which university did you graduate from?</Label>
+                          <Input
+                            id="university_graduated"
+                            value={editData.university_graduated || ''}
+                            onChange={(e) => handleEditChange('university_graduated', e.target.value)}
+                            placeholder="Enter your university name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="work_experience">Work Experience (years)</Label>
+                          <Input
+                            id="work_experience"
+                            type="number"
+                            value={editData.work_experience || ''}
+                            onChange={(e) => handleEditChange('work_experience', e.target.value)}
+                            placeholder="Enter your work experience in years"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="student_id">Student ID</Label>
+                        <Input
+                          id="student_id"
+                          value={editData.student_id}
+                          onChange={(e) => handleEditChange('student_id', e.target.value)}
+                          placeholder="Enter your student ID"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Skills */}
@@ -382,129 +620,247 @@ const Profile = () => {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      <Mail className="w-5 h-5 text-muted-foreground" />
+                <>
+                  {displayProfile?.role === 'tpo' ? (
+                    /* TPO Profile Display */
+                    <div className="space-y-8">
+                      {/* Company Information */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                          <Building className="w-5 h-5 text-blue-600" />
+                          Company Information
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Mail className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Company Email</p>
+                              <p className="font-semibold">{displayProfile?.email}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Phone className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Phone Number</p>
+                              <p className="font-semibold">{displayProfile?.phone_number || 'Not provided'}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Award className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Global Ranking</p>
+                              <p className="font-semibold">{displayProfile?.global_ranking}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <MapPin className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Headquarters</p>
+                              <p className="font-semibold">{displayProfile?.headquarters_location}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Users className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Employees</p>
+                              <p className="font-semibold">{displayProfile?.employees_count?.toLocaleString()} employees</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Calendar className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Founded</p>
+                              <p className="font-semibold">{displayProfile?.founded_year}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* CEO Information */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                          <User className="w-5 h-5 text-purple-600" />
+                          CEO Information
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <User className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">CEO Name</p>
+                              <p className="font-semibold">{displayProfile?.ceo_name}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Mail className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">CEO Email</p>
+                              <p className="font-semibold">{displayProfile?.ceo_email}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Award className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Position</p>
+                              <p className="font-semibold capitalize">{displayProfile?.executive_position?.replace('_', ' ')}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <Calendar className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Experience</p>
+                              <p className="font-semibold">{displayProfile?.years_of_experience} years</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3 md:col-span-2">
+                            <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                              <GraduationCap className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-muted-foreground">Education</p>
+                              <p className="font-semibold">{displayProfile?.education_background}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Platform Statistics */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-green-600" />
+                          Platform Statistics
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="text-center p-4 bg-blue-50 rounded-lg">
+                            <div className="text-2xl font-bold text-blue-600">{displayProfile?.opportunities_posted}</div>
+                            <div className="text-sm text-muted-foreground">Opportunities Posted</div>
+                          </div>
+                          <div className="text-center p-4 bg-green-50 rounded-lg">
+                            <div className="text-2xl font-bold text-green-600">{displayProfile?.students_hired}</div>
+                            <div className="text-sm text-muted-foreground">Students Hired</div>
+                          </div>
+                          <div className="text-center p-4 bg-purple-50 rounded-lg">
+                            <div className="text-2xl font-bold text-purple-600">{displayProfile?.employees_recruited}</div>
+                            <div className="text-sm text-muted-foreground">Employees Recruited</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Email Address</p>
-                      <p className="font-semibold">{userProfile?.email}</p>
+                  ) : (
+                    /* Student/Employee Profile Display */
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                          <Mail className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Email Address</p>
+                          <p className="font-semibold">{displayProfile?.email}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                          <Phone className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground">Phone Number</p>
+                          <p className="font-semibold">{displayProfile?.phone_number || 'Not provided'}</p>
+                        </div>
+                      </div>
+                      
+                      {(displayProfile as any)?.student_id && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Student ID</p>
+                            <p className="font-semibold">{(displayProfile as any)?.student_id}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {(displayProfile as any)?.graduation_year && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground">Graduation Year</p>
+                            <p className="font-semibold">{(displayProfile as any)?.graduation_year}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Phone Number</p>
-                      <p className="font-semibold">{userProfile?.phone_number || 'Not provided'}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Student ID</p>
-                      <p className="font-semibold">{userProfile?.student_id || 'Not provided'}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Graduation Year</p>
-                      <p className="font-semibold">{userProfile?.graduation_year || 'Not provided'}</p>
-                    </div>
-                  </div>
-                </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
 
-          {/* Skills Section */}
-          {!isEditing && userProfile?.skills && userProfile.skills.length > 0 && (
-            <Card className="mb-8 shadow-medium">
-              <CardHeader>
-                <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5" />
-                  Skills & Technologies
-                </h3>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {userProfile.skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary" className="text-sm">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Links Section */}
-          {!isEditing && (
-            <Card className="shadow-medium">
-              <CardHeader>
-                <h3 className="text-xl font-semibold">Professional Links</h3>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {userProfile?.linkedin_url && (
+          {/* Additional Sections - Only for Students and Employees */}
+          {!isEditing && displayProfile?.role !== 'tpo' && (
+            <>
+              {/* Company Website Link for TPO */}
+              {displayProfile?.role === 'tpo' && displayProfile?.company_website && (
+                <Card className="shadow-medium">
+                  <CardHeader>
+                    <h3 className="text-xl font-semibold">Company Links</h3>
+                  </CardHeader>
+                  <CardContent>
                     <Button variant="outline" className="h-12 justify-start" asChild>
-                      <a href={userProfile.linkedin_url} target="_blank" rel="noopener noreferrer">
-                        <Users className="mr-3 h-5 w-5 text-blue-600" />
+                      <a href={displayProfile.company_website} target="_blank" rel="noopener noreferrer">
+                        <Building className="mr-3 h-5 w-5 text-blue-600" />
                         <div className="text-left">
-                          <div className="font-medium">LinkedIn</div>
-                          <div className="text-xs text-muted-foreground">Professional Profile</div>
+                          <div className="font-medium">Company Website</div>
+                          <div className="text-xs text-muted-foreground">Official Website</div>
                         </div>
                       </a>
                     </Button>
-                  )}
-                  
-                  {userProfile?.github_url && (
-                    <Button variant="outline" className="h-12 justify-start" asChild>
-                      <a href={userProfile.github_url} target="_blank" rel="noopener noreferrer">
-                        <Brain className="mr-3 h-5 w-5 text-gray-800" />
-                        <div className="text-left">
-                          <div className="font-medium">GitHub</div>
-                          <div className="text-xs text-muted-foreground">Code Repository</div>
-                        </div>
-                      </a>
-                    </Button>
-                  )}
-                  
-                  {userProfile?.portfolio_url && (
-                    <Button variant="outline" className="h-12 justify-start" asChild>
-                      <a href={userProfile.portfolio_url} target="_blank" rel="noopener noreferrer">
-                        <Zap className="mr-3 h-5 w-5 text-purple-600" />
-                        <div className="text-left">
-                          <div className="font-medium">Portfolio</div>
-                          <div className="text-xs text-muted-foreground">Personal Website</div>
-                        </div>
-                      </a>
-                    </Button>
-                  )}
-                  
-                  {(!userProfile?.linkedin_url && !userProfile?.github_url && !userProfile?.portfolio_url) && (
-                    <div className="col-span-full text-center py-8 text-muted-foreground">
-                      <Zap className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p>No professional links added yet.</p>
-                      <Button variant="outline" size="sm" className="mt-2" onClick={() => setIsEditing(true)}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Add Links
+                    {displayProfile?.ceo_linkedin && (
+                      <Button variant="outline" className="h-12 justify-start mt-2" asChild>
+                        <a href={displayProfile.ceo_linkedin} target="_blank" rel="noopener noreferrer">
+                          <Users className="mr-3 h-5 w-5 text-blue-600" />
+                          <div className="text-left">
+                            <div className="font-medium">CEO LinkedIn</div>
+                            <div className="text-xs text-muted-foreground">{displayProfile.ceo_name}</div>
+                          </div>
+                        </a>
                       </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </div>
       </div>
