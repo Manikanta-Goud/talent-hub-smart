@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Users, BarChart3, Zap, Target, Sparkles, LogOut, User, ChevronDown } from "lucide-react";
+import { Brain, Users, BarChart3, Zap, Target, Sparkles, User, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AIAssistant from "@/components/AIAssistant";
 import heroCampus from "@/assets/hero-campus.jpg";
@@ -44,7 +44,7 @@ const LandingPage = () => {
     {
       icon: Users,
       title: "Role-Based Portals",
-      description: "Dedicated interfaces for students, TPOs, mentors, and employers with tailored experiences.",
+      description: "Dedicated interfaces for students, employees, admins, and employers with tailored experiences for knowledge sharing.",
       image: "https://y7b6t9n6.delivery.rocketcdn.me/wp-content/uploads/2024/02/4-TOP-10-eLearning-Websites-1024x587.png.webp",
       color: "bg-campus-primary"
     },
@@ -61,7 +61,7 @@ const LandingPage = () => {
     {
       phase: "Phase 1",
       title: "Foundational MVP",
-      description: "Core workflow between students and TPOs with authentication, profiles, and application tracking.",
+      description: "Core workflow between students, employees, and admins with authentication, profiles, and knowledge sharing.",
       status: "In Development"
     },
     {
@@ -99,7 +99,7 @@ const LandingPage = () => {
             >
               <Avatar className="h-11 w-11 border-2 border-white/20 shadow-md">
                 <AvatarImage 
-                  src={userProfile?.resume_url} 
+                  src={(userProfile as any)?.resume_url} 
                   alt={userProfile?.full_name}
                   className="object-cover"
                 />
@@ -111,80 +111,15 @@ const LandingPage = () => {
               <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
             </Button>
             
-            {/* Dropdown Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-muted/50 transition-all duration-200"
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 p-2" align="end" sideOffset={8}>
-              <DropdownMenuLabel className="font-normal p-3 bg-muted/30 rounded-lg mb-2">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10 border border-border">
-                    <AvatarImage src={userProfile?.resume_url} alt={userProfile?.full_name} />
-                    <AvatarFallback className="bg-gradient-primary text-white text-sm">
-                      {getUserInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {userProfile?.full_name || 'User'}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground truncate">
-                      {user?.email}
-                    </p>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="my-2" />
-              <DropdownMenuItem 
-                onClick={() => navigate('/profile')}
-                className="p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
-              >
-                <User className="mr-3 h-4 w-4 text-primary" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Profile</span>
-                  <span className="text-xs text-muted-foreground">View and edit your profile</span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => navigate('/student')}
-                className="p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
-              >
-                <User className="mr-3 h-4 w-4 text-blue-600" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Student Portal</span>
-                  <span className="text-xs text-muted-foreground">Access student features</span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => navigate('/tpo')}
-                className="p-3 rounded-lg hover:bg-primary/10 cursor-pointer transition-colors"
-              >
-                <Target className="mr-3 h-4 w-4 text-green-600" />
-                <div className="flex flex-col">
-                  <span className="font-medium">TPO Portal</span>
-                  <span className="text-xs text-muted-foreground">Training & Placement Office</span>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="my-2" />
-              <DropdownMenuItem 
-                onClick={handleLogout}
-                className="p-3 rounded-lg hover:bg-red-50 cursor-pointer transition-colors text-red-600"
-              >
-                <LogOut className="mr-3 h-4 w-4" />
-                <div className="flex flex-col">
-                  <span className="font-medium">Log out</span>
-                  <span className="text-xs text-muted-foreground">Sign out of your account</span>
-                </div>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            {/* Direct Profile Access - No Dropdown */}
+            <Button 
+              onClick={() => navigate('/profile')}
+              variant="ghost" 
+              size="icon"
+              className="h-8 w-8 rounded-full hover:bg-muted/50 transition-all duration-200"
+            >
+              <User className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </nav>
@@ -210,7 +145,7 @@ const LandingPage = () => {
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               {userProfile ? 
-                `Ready to explore new opportunities? Access your personalized dashboard and discover internships tailored for ${userProfile.course} students.` :
+                `Ready to explore new opportunities? Access your personalized dashboard and discover internships tailored for ${(userProfile as any)?.course} students.` :
                 'Access your personalized dashboard and discover new opportunities tailored just for you.'
               }
             </p>
@@ -224,6 +159,15 @@ const LandingPage = () => {
                 <Users className="w-5 h-5" />
                 Student Portal
               </Button>
+              <Button
+                variant="employee"
+                size="lg"
+                onClick={() => navigate('/employee')}
+                className="text-lg px-8 py-3"
+              >
+                <Briefcase className="w-5 h-5" />
+                Employee Portal
+              </Button>
               <Button 
                 variant="ai" 
                 size="lg"
@@ -231,7 +175,7 @@ const LandingPage = () => {
                 className="text-lg px-8 py-3"
               >
                 <Target className="w-5 h-5" />
-                TPO Portal
+                Admin Portal
               </Button>
             </div>
           </div>

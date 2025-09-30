@@ -5,7 +5,7 @@ A comprehensive campus placement management system built for Smart India Hackath
 ## 🚀 Features
 
 - **Authentication System**: Secure user registration and login with Supabase
-- **Role-based Portals**: Dedicated interfaces for students and TPOs
+- **Role-based Portals**: Dedicated interfaces for students and admins
 - **User Profiles**: Comprehensive student profiles with skills, academic details, and portfolio links
 - **Protected Routes**: Secure access to different sections based on authentication
 - **Responsive Design**: Modern UI built with React, TypeScript, and Tailwind CSS
@@ -130,8 +130,8 @@ The application will be available at `http://localhost:5173`
 3. **Profile**: View and manage your profile information
 4. **Portals**: Access student-specific features and opportunities
 
-### For TPOs (Training & Placement Officers)
-1. **Login**: Access TPO-specific dashboard
+### For Admins (Training & Placement Officers)
+1. **Login**: Access admin-specific dashboard
 2. **Manage**: Oversee student placements and opportunities
 
 ## 🔐 Authentication Flow

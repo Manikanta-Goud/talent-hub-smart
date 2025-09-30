@@ -10,6 +10,7 @@ import { Register } from "./components/Register";
 import Index from "./pages/Index";
 import StudentPortal from "./pages/StudentPortal";
 import TPOPortal from "./pages/TPOPortal";
+import EmployeePortal from "./pages/EmployeePortal";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +50,11 @@ const App = () => (
             <Route path="/tpo" element={
               <ProtectedRoute>
                 <TPOPortal />
+              </ProtectedRoute>
+            } />
+            <Route path="/employee" element={
+              <ProtectedRoute>
+                <EmployeePortal />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={

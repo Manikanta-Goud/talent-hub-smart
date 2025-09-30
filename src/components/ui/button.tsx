@@ -18,6 +18,7 @@ const buttonVariants = cva(
         hero: "bg-gradient-primary text-primary-foreground hover:shadow-glow transform hover:scale-105 transition-spring font-semibold",
         student: "bg-campus-primary text-primary-foreground hover:bg-campus-primary/90 shadow-soft transition-spring",
         tpo: "bg-campus-secondary text-primary-foreground hover:bg-campus-secondary/90 shadow-soft transition-spring",
+        employee: "bg-green-600 text-white hover:bg-green-700 shadow-soft transition-spring",
         ai: "bg-gradient-secondary text-primary-foreground hover:shadow-glow transform hover:scale-105 transition-spring font-medium",
       },
       size: {

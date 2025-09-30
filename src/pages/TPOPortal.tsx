@@ -616,7 +616,7 @@ const TPOPortal = () => {
                   <Settings className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-foreground">TPO Portal</h1>
+                  <h1 className="text-xl font-bold text-foreground">Admin Portal</h1>
                   <p className="text-sm text-muted-foreground">Placement Control Center</p>
                 </div>
               </div>
