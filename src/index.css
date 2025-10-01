@@ -295,6 +295,61 @@ All colors MUST be HSL.
   background: rgba(255, 255, 255, 0.5);
 }
 
+/* Communication scrollbars */
+.scrollbar-blue::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-track {
+  background: #dbeafe;
+  border-radius: 3px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb {
+  background: #93c5fd;
+  border-radius: 3px;
+}
+
+.scrollbar-blue::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
+
+.scrollbar-green::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-green::-webkit-scrollbar-track {
+  background: #dcfce7;
+  border-radius: 3px;
+}
+
+.scrollbar-green::-webkit-scrollbar-thumb {
+  background: #86efac;
+  border-radius: 3px;
+}
+
+.scrollbar-green::-webkit-scrollbar-thumb:hover {
+  background: #4ade80;
+}
+
+.scrollbar-gray::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-gray::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.scrollbar-gray::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 3px;
+}
+
+.scrollbar-gray::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
 /* Input focus effects */
 .input-glow:focus-within {
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2), 

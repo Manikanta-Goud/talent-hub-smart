@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Communication from "@/components/Communication";
 import { 
   ArrowLeft, 
@@ -34,7 +35,19 @@ import {
   AlertCircle,
   Activity,
   GraduationCap,
-  Send
+  Send,
+  DollarSign,
+  Heart,
+  Share2,
+  Zap,
+  Plus,
+  Edit,
+  MessageCircle,
+  Video,
+  MoreVertical,
+  Paperclip,
+  Smile,
+  X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,6 +58,115 @@ const EmployeePortal = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
   const [showCommunication, setShowCommunication] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [chatMessage, setChatMessage] = useState("");
+
+  // Employee opportunities data - job listings, internships, hackathons for employees
+  const employeeOpportunities = [
+    {
+      id: 1,
+      title: "Senior React Developer",
+      company: "TechCorp Solutions",
+      location: "Bangalore",
+      type: "full-time",
+      salary: "₹15-25 LPA",
+      experience: "3-5 years",
+      description: "Join our team to build scalable web applications using React and Node.js.",
+      skills: ["React", "Node.js", "TypeScript", "AWS"],
+      posted: "2024-01-15",
+      applications: 24,
+      featured: true,
+      remote: true
+    },
+    {
+      id: 2,
+      title: "ML Engineer",
+      company: "DataSense Labs",
+      location: "Hyderabad",
+      type: "full-time",
+      salary: "₹20-30 LPA",
+      experience: "4-6 years",
+      description: "Develop and deploy machine learning models at scale.",
+      skills: ["Python", "TensorFlow", "MLOps", "Docker"],
+      posted: "2024-01-18",
+      applications: 18,
+      featured: true,
+      remote: false
+    },
+    {
+      id: 3,
+      title: "DevOps Specialist",
+      company: "CloudTech",
+      location: "Chennai",
+      type: "full-time",
+      salary: "₹18-28 LPA",
+      experience: "3-5 years",
+      description: "Manage cloud infrastructure and CI/CD pipelines.",
+      skills: ["AWS", "Kubernetes", "Docker", "Jenkins"],
+      posted: "2024-01-20",
+      applications: 15,
+      featured: false,
+      remote: true
+    },
+    {
+      id: 4,
+      title: "Freelance UI/UX Designer",
+      company: "Multiple Clients",
+      location: "Remote",
+      type: "freelance",
+      salary: "₹50,000-₹1,00,000/project",
+      experience: "2-4 years",
+      description: "Design beautiful and intuitive user interfaces for web and mobile.",
+      skills: ["Figma", "Sketch", "User Research", "Prototyping"],
+      posted: "2024-01-25",
+      applications: 8,
+      featured: false,
+      remote: true
+    },
+    {
+      id: 5,
+      title: "Tech Hackathon 2024",
+      company: "Innovation Hub",
+      location: "Multiple Cities",
+      type: "hackathon",
+      salary: "₹2,00,000 prize pool",
+      experience: "All levels",
+      description: "48-hour hackathon to build innovative tech solutions.",
+      skills: ["Innovation", "Programming", "Teamwork", "Problem Solving"],
+      posted: "2024-01-28",
+      applications: 45,
+      featured: true,
+      remote: false
+    },
+    {
+      id: 6,
+      title: "Mentorship Program Lead",
+      company: "TechMentors Inc",
+      location: "Pune",
+      type: "internship",
+      salary: "₹30,000/month",
+      experience: "1-2 years",
+      description: "Lead mentorship programs for junior developers.",
+      skills: ["Leadership", "Mentoring", "Communication", "Technical Skills"],
+      posted: "2024-01-30",
+      applications: 12,
+      featured: false,
+      remote: true
+    }
+  ];
+
+  const [filteredOpportunities, setFilteredOpportunities] = useState(employeeOpportunities);
+  const [opportunityFilter, setOpportunityFilter] = useState('all');
+
+  const filterOpportunities = (type: string) => {
+    setOpportunityFilter(type);
+    if (type === 'all') {
+      setFilteredOpportunities(employeeOpportunities);
+    } else {
+      setFilteredOpportunities(employeeOpportunities.filter(opp => opp.type === type));
+    }
+  };
 
   // Check if the current user is a student
   const isStudentUser = userProfile?.role === 'student' || user?.email === 'student@gmail.com';
@@ -225,6 +347,89 @@ const EmployeePortal = () => {
     hoursContributed: 156,
     skillsShared: 15,
     certificationsEarned: 3
+  };
+
+  // Employee conversation data
+  const employeeConversations = [
+    {
+      id: 1,
+      type: 'tpo',
+      name: "Dr. Smith (TPO)",
+      avatar: "DS",
+      lastMessage: "Thank you for mentoring our students this semester",
+      lastMessageTime: "1 hour ago",
+      unread: 0,
+      isOnline: true,
+      status: "Training & Placement Officer",
+      messages: [
+        { id: 1, sender: "Dr. Smith", message: "Hi! How are your current mentees performing?", timestamp: "10:00 AM", isMe: false },
+        { id: 2, sender: "Me", message: "They're doing great! Alex is showing excellent progress in React", timestamp: "10:15 AM", isMe: true },
+        { id: 3, sender: "Dr. Smith", message: "Thank you for mentoring our students this semester", timestamp: "10:30 AM", isMe: false }
+      ]
+    },
+    {
+      id: 2,
+      type: 'student',
+      name: "Alex Kumar",
+      avatar: "AK",
+      lastMessage: "Could you review my project code?",
+      lastMessageTime: "30 min ago",
+      unread: 1,
+      isOnline: true,
+      status: "3rd Year CS Student, mentee",
+      messages: [
+        { id: 1, sender: "Alex Kumar", message: "Hi! I've completed the React component we discussed", timestamp: "2:00 PM", isMe: false },
+        { id: 2, sender: "Me", message: "Excellent! Please share the code and I'll review it", timestamp: "2:05 PM", isMe: true },
+        { id: 3, sender: "Alex Kumar", message: "Could you review my project code?", timestamp: "2:30 PM", isMe: false }
+      ]
+    },
+    {
+      id: 3,
+      type: 'colleague',
+      name: "Sarah Chen",
+      avatar: "SC",
+      lastMessage: "Want to collaborate on the ML workshop?",
+      lastMessageTime: "2 hours ago",
+      unread: 0,
+      isOnline: false,
+      status: "Senior ML Engineer at Google",
+      messages: [
+        { id: 1, sender: "Sarah Chen", message: "Hi! I'm organizing an ML workshop for students", timestamp: "1:00 PM", isMe: false },
+        { id: 2, sender: "Me", message: "That sounds great! I'd love to help", timestamp: "1:15 PM", isMe: true },
+        { id: 3, sender: "Sarah Chen", message: "Want to collaborate on the ML workshop?", timestamp: "1:30 PM", isMe: false }
+      ]
+    }
+  ];
+
+  // Employee notifications data
+  const employeeNotifications = [
+    {
+      id: 1,
+      type: "mentorship",
+      title: "New Mentorship Request",
+      message: "Priya Sharma wants you as a mentor for full-stack development",
+      timestamp: "1 hour ago",
+      isRead: false,
+      priority: "medium",
+      actionRequired: true
+    },
+    {
+      id: 2,
+      type: "opportunity",
+      title: "Job Opportunity Match",
+      message: "Senior React Developer position at TechCorp matches your profile",
+      timestamp: "3 hours ago",
+      isRead: true,
+      priority: "high",
+      actionRequired: false
+    }
+  ];
+
+  const handleSendMessage = () => {
+    if (!chatMessage.trim() || !selectedChat) return;
+    
+    setChatMessage("");
+    // Add toast notification here if needed
   };
 
   // Career advancement opportunities for employees
@@ -469,20 +674,32 @@ const EmployeePortal = () => {
                 <Briefcase className="w-4 h-4 mr-1" />
                 {isStudentUser ? 'Student' : 'Employee'}
               </Badge>
-              {!isStudentUser && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowCommunication(true)}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Communicate
-                </Button>
-              )}
-              <Button variant="outline" size="sm">
+              
+              {/* Communication Button */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowCommunication(true)}
+                className="relative"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Communication
+              </Button>
+              
+              {/* Notifications Button */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowNotifications(true)}
+                className="relative"
+              >
                 <Bell className="w-4 h-4 mr-2" />
                 Notifications
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  2
+                </Badge>
               </Button>
+              
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -599,10 +816,11 @@ const EmployeePortal = () => {
 
             {/* Tabs for Different Sections */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
                 <TabsTrigger value="mentees">My Mentees</TabsTrigger>
-                <TabsTrigger value="students">Opportunities</TabsTrigger>
+                <TabsTrigger value="students">Students</TabsTrigger>
                 <TabsTrigger value="colleagues">Colleagues</TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -731,6 +949,271 @@ const EmployeePortal = () => {
                           </CardContent>
                         </Card>
                       ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Opportunities Tab - Job opportunities for employees */}
+              <TabsContent value="opportunities" className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-3xl font-bold tracking-tight">Career Opportunities</h2>
+                    <p className="text-muted-foreground">
+                      Discover new job opportunities, internships, hackathons, and career advancement options
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Post Job
+                    </Button>
+                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filter Jobs
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Filter Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={opportunityFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => filterOpportunities('all')}
+                    className="rounded-full"
+                  >
+                    All Opportunities
+                  </Button>
+                  <Button
+                    variant={opportunityFilter === 'full-time' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => filterOpportunities('full-time')}
+                    className="rounded-full"
+                  >
+                    <Briefcase className="w-4 h-4 mr-1" />
+                    Full-time Jobs
+                  </Button>
+                  <Button
+                    variant={opportunityFilter === 'freelance' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => filterOpportunities('freelance')}
+                    className="rounded-full"
+                  >
+                    <Target className="w-4 h-4 mr-1" />
+                    Freelance
+                  </Button>
+                  <Button
+                    variant={opportunityFilter === 'internship' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => filterOpportunities('internship')}
+                    className="rounded-full"
+                  >
+                    <GraduationCap className="w-4 h-4 mr-1" />
+                    Internships
+                  </Button>
+                  <Button
+                    variant={opportunityFilter === 'hackathon' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => filterOpportunities('hackathon')}
+                    className="rounded-full"
+                  >
+                    <Zap className="w-4 h-4 mr-1" />
+                    Hackathons
+                  </Button>
+                </div>
+
+                {/* Featured Opportunities */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold">🌟 Featured Opportunities</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {filteredOpportunities.filter(opp => opp.featured).map((opportunity) => (
+                      <Card key={opportunity.id} className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 hover:shadow-lg transition-all">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100 rounded-lg">
+                                <Briefcase className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-lg">{opportunity.title}</h4>
+                                <p className="text-blue-600 font-medium">{opportunity.company}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                Featured
+                              </Badge>
+                              {opportunity.remote && (
+                                <Badge variant="outline" className="text-xs">
+                                  Remote
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-600 mb-4">{opportunity.description}</p>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">{opportunity.location}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">{opportunity.experience}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-green-600" />
+                              <span className="text-sm font-medium text-green-600">{opportunity.salary}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">{opportunity.applications} applications</span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {opportunity.skills.slice(0, 3).map((skill, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {opportunity.skills.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{opportunity.skills.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
+                              Apply Now
+                            </Button>
+                            <Button variant="outline" size="icon">
+                              <Heart className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="icon">
+                              <Share2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* All Opportunities */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold">All Opportunities</h3>
+                  <div className="grid gap-4">
+                    {filteredOpportunities.map((opportunity) => (
+                      <Card key={opportunity.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${
+                                opportunity.type === 'full-time' ? 'bg-blue-100' :
+                                opportunity.type === 'freelance' ? 'bg-purple-100' : 
+                                opportunity.type === 'hackathon' ? 'bg-yellow-100' : 'bg-green-100'
+                              }`}>
+                                <Briefcase className={`w-5 h-5 ${
+                                  opportunity.type === 'full-time' ? 'text-blue-600' :
+                                  opportunity.type === 'freelance' ? 'text-purple-600' : 
+                                  opportunity.type === 'hackathon' ? 'text-yellow-600' : 'text-green-600'
+                                }`} />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-lg">{opportunity.title}</h4>
+                                <p className="text-gray-600">{opportunity.company}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <Badge variant={
+                                opportunity.type === 'full-time' ? 'default' :
+                                opportunity.type === 'freelance' ? 'secondary' : 
+                                opportunity.type === 'hackathon' ? 'outline' : 'outline'
+                              }>
+                                {opportunity.type === 'full-time' ? 'Full-time' :
+                                 opportunity.type === 'freelance' ? 'Freelance' :
+                                 opportunity.type === 'hackathon' ? 'Hackathon' : 'Internship'}
+                              </Badge>
+                              {opportunity.remote && (
+                                <Badge variant="outline" className="text-xs">
+                                  Remote
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <p className="text-gray-600 mb-4">{opportunity.description}</p>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">{opportunity.location}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">{opportunity.experience}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-green-600" />
+                              <span className="text-sm font-medium text-green-600">{opportunity.salary}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm">{opportunity.applications} applications</span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {opportunity.skills.map((skill, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-500">
+                              Posted: {new Date(opportunity.posted).toLocaleDateString()}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                                Apply Now
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Heart className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Actions for Employees */}
+                <Card className="bg-gradient-to-r from-green-50 to-blue-50">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold mb-4">Professional Development</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                        <Edit className="w-6 h-6 text-blue-600" />
+                        <span>Update Resume</span>
+                        <p className="text-xs text-gray-500">Keep your profile updated</p>
+                      </Button>
+                      <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                        <TrendingUp className="w-6 h-6 text-green-600" />
+                        <span>Skill Assessment</span>
+                        <p className="text-xs text-gray-500">Test your abilities</p>
+                      </Button>
+                      <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                        <Users className="w-6 h-6 text-purple-600" />
+                        <span>Network</span>
+                        <p className="text-xs text-gray-500">Connect with professionals</p>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1318,13 +1801,384 @@ const EmployeePortal = () => {
         )}
       </div>
 
-      {/* Communication Modal */}
-      {showCommunication && (
-        <Communication 
-          onClose={() => setShowCommunication(false)}
-          userRole={isStudentUser ? 'student' : 'employee'}
-        />
-      )}
+      {/* Communication Dialog */}
+      <Dialog open={showCommunication} onOpenChange={setShowCommunication}>
+        <DialogContent className="max-w-7xl h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Professional Communication
+            </DialogTitle>
+            <DialogDescription>
+              Connect with TPO officers, students, and colleagues for mentorship and collaboration
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0 overflow-hidden">
+            {/* Students Section (Left Side) */}
+            <Card className="lg:col-span-1 flex flex-col h-full min-h-0 overflow-hidden">
+              <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-blue-100 border-b flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <User className="w-4 h-4 text-blue-600" />
+                    Students
+                  </CardTitle>
+                  <Badge variant="outline" className="bg-blue-100 text-blue-800 text-xs">
+                    {employeeConversations.filter(c => c.type === 'student').length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <div className="h-full overflow-y-auto p-1" style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#60a5fa #dbeafe'
+                }}>
+                  <div className="space-y-1">
+                    {employeeConversations
+                      .filter(conversation => conversation.type === 'student')
+                      .map((conversation) => (
+                      <div
+                        key={conversation.id}
+                        onClick={() => setSelectedChat(conversation)}
+                        className={`flex items-center gap-2 p-2 hover:bg-blue-50 cursor-pointer transition-all duration-200 border-l-3 rounded-r-md ${
+                          selectedChat?.id === conversation.id 
+                            ? 'bg-blue-100 border-l-blue-500 shadow-sm' 
+                            : 'border-l-transparent hover:border-l-blue-300'
+                        }`}
+                      >
+                        <div className="relative flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold shadow-sm">
+                            {conversation.avatar}
+                          </div>
+                          {conversation.isOnline && (
+                            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-xs truncate">{conversation.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs font-medium text-blue-600">Student</span>
+                            {conversation.unread > 0 && (
+                              <Badge variant="destructive" className="h-3 w-3 p-0 flex items-center justify-center text-xs">
+                                {conversation.unread}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {employeeConversations.filter(c => c.type === 'student').length === 0 && (
+                      <div className="text-center py-4 text-muted-foreground">
+                        <User className="w-5 h-5 mx-auto mb-2 opacity-50" />
+                        <p className="text-xs">No students</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* TPO Officers Section (Right Side) */}
+            <Card className="lg:col-span-1 flex flex-col h-full min-h-0 overflow-hidden">
+              <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-purple-100 border-b flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-purple-600" />
+                    TPO Officers
+                  </CardTitle>
+                  <Badge variant="outline" className="bg-purple-100 text-purple-800 text-xs">
+                    {employeeConversations.filter(c => c.type === 'tpo').length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <div className="h-full overflow-y-auto p-1" style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#c084fc #f3e8ff'
+                }}>
+                  <div className="space-y-1">
+                    {employeeConversations
+                      .filter(conversation => conversation.type === 'tpo')
+                      .map((conversation) => (
+                      <div
+                        key={conversation.id}
+                        onClick={() => setSelectedChat(conversation)}
+                        className={`flex items-center gap-2 p-2 hover:bg-purple-50 cursor-pointer transition-all duration-200 border-l-3 rounded-r-md ${
+                          selectedChat?.id === conversation.id 
+                            ? 'bg-purple-100 border-l-purple-500 shadow-sm' 
+                            : 'border-l-transparent hover:border-l-purple-300'
+                        }`}
+                      >
+                        <div className="relative flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-semibold shadow-sm">
+                            {conversation.avatar}
+                          </div>
+                          {conversation.isOnline && (
+                            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-xs truncate">{conversation.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs font-medium text-purple-600">TPO Officer</span>
+                            {conversation.unread > 0 && (
+                              <Badge variant="destructive" className="h-3 w-3 p-0 flex items-center justify-center text-xs">
+                                {conversation.unread}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {employeeConversations.filter(c => c.type === 'tpo').length === 0 && (
+                      <div className="text-center py-4 text-muted-foreground">
+                        <GraduationCap className="w-5 h-5 mx-auto mb-2 opacity-50" />
+                        <p className="text-xs">No TPO officers</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Chat Window */}
+            <Card className="lg:col-span-2 flex flex-col shadow-lg h-full min-h-0 overflow-hidden">
+              {selectedChat ? (
+                <>
+                  {/* Enhanced Chat Header */}
+                  <CardHeader className={`pb-3 border-b ${
+                    selectedChat.type === 'tpo' ? 'bg-purple-50' :
+                    selectedChat.type === 'student' ? 'bg-blue-50' : 'bg-green-50'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <div className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold shadow-md ${
+                            selectedChat.type === 'tpo' 
+                              ? 'bg-purple-100 text-purple-600' 
+                              : selectedChat.type === 'student'
+                              ? 'bg-blue-100 text-blue-600'
+                              : 'bg-green-100 text-green-600'
+                          }`}>
+                            {selectedChat.avatar}
+                          </div>
+                          {selectedChat.isOnline && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white"></div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-xl">{selectedChat.name}</h3>
+                          <p className="text-sm text-muted-foreground font-medium">{selectedChat.status}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className={`w-2 h-2 rounded-full ${selectedChat.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                            <span className="text-xs font-medium">
+                              {selectedChat.isOnline ? 'Online now' : 'Offline'}
+                            </span>
+                            <Badge variant="outline" className={`text-xs ml-2 ${
+                              selectedChat.type === 'tpo' ? 'bg-purple-100 text-purple-800' :
+                              selectedChat.type === 'student' ? 'bg-blue-100 text-blue-800' :
+                              'bg-green-100 text-green-800'
+                            }`}>
+                              {selectedChat.type === 'tpo' ? 'TPO Officer' : 
+                               selectedChat.type === 'student' ? 'Student' : 'Colleague'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" className="hover:bg-green-50">
+                          <Phone className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" className="hover:bg-green-50">
+                          <Video className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" className="hover:bg-green-50">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  {/* Enhanced Messages */}
+                  <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+                    {selectedChat.messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.isMe ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-[75%] ${
+                          message.isMe 
+                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                            : 'bg-white text-gray-900 shadow-md border border-gray-200'
+                        } rounded-2xl px-5 py-3 transform transition-all duration-200 hover:scale-[1.02]`}>
+                          <p className="text-sm leading-relaxed">{message.message}</p>
+                          <p className={`text-xs mt-2 ${
+                            message.isMe ? 'text-green-100' : 'text-gray-500'
+                          }`}>
+                            {message.timestamp}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+
+                  {/* Enhanced Message Input */}
+                  <div className="p-6 border-t bg-white">
+                    <div className="flex items-center gap-3">
+                      <Button variant="outline" size="sm" className="hover:bg-gray-50 rounded-full">
+                        <Paperclip className="w-4 h-4" />
+                      </Button>
+                      <div className="flex-1 relative">
+                        <Input
+                          placeholder={`Message ${selectedChat.name}...`}
+                          value={chatMessage}
+                          onChange={(e) => setChatMessage(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                          className="pr-12 py-4 rounded-full border-2 focus:border-green-400 shadow-sm text-base"
+                        />
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 rounded-full"
+                        >
+                          <Smile className="w-5 h-5" />
+                        </Button>
+                      </div>
+                      <Button 
+                        onClick={handleSendMessage}
+                        disabled={!chatMessage.trim()}
+                        className={`px-8 py-4 rounded-full font-semibold text-base shadow-lg ${
+                          selectedChat.type === 'tpo' ? 'bg-purple-500 hover:bg-purple-600' :
+                          selectedChat.type === 'student' ? 'bg-blue-500 hover:bg-blue-600' :
+                          'bg-green-500 hover:bg-green-600'
+                        } text-white disabled:opacity-50 transform transition-all duration-200 hover:scale-105`}
+                      >
+                        <Send className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <CardContent className="flex-1 flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <MessageCircle className="w-20 h-20 mx-auto mb-6 opacity-30" />
+                    <p className="text-2xl font-semibold mb-3">Professional Network</p>
+                    <p className="text-lg mb-6">Select a contact to begin professional communication</p>
+                    <div className="flex items-center justify-center gap-8">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                        <span className="text-sm font-medium">TPO Officers</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Students</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Colleagues</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent className="max-w-2xl h-[70vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Notifications
+            </DialogTitle>
+            <DialogDescription>
+              Stay updated with mentorship requests and job opportunities
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="px-3">
+                {employeeNotifications.length} Total
+              </Badge>
+              <Badge variant="destructive" className="px-3">
+                {employeeNotifications.filter(n => !n.isRead).length} Unread
+              </Badge>
+            </div>
+            <Button variant="outline" size="sm">
+              Mark All as Read
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-3">
+            {employeeNotifications.map((notification) => (
+              <Card key={notification.id} className={`${!notification.isRead ? 'bg-blue-50 border-blue-200' : ''} hover:shadow-sm transition-all`}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          notification.type === 'mentorship' ? 'bg-blue-100 text-blue-600' :
+                          notification.type === 'opportunity' ? 'bg-green-100 text-green-600' :
+                          'bg-purple-100 text-purple-600'
+                        }`}>
+                          {notification.type === 'mentorship' ? '👥' :
+                           notification.type === 'opportunity' ? '💼' :
+                           '🔔'}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm">{notification.title}</h4>
+                          <p className="text-xs text-muted-foreground">{notification.message}</p>
+                        </div>
+                        {!notification.isRead && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">{notification.timestamp}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={
+                            notification.priority === 'high' ? 'destructive' :
+                            notification.priority === 'medium' ? 'default' :
+                            'secondary'
+                          } className="text-xs">
+                            {notification.priority}
+                          </Badge>
+                          {notification.actionRequired && (
+                            <Badge variant="outline" className="text-xs">
+                              Action Required
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {notification.actionRequired && (
+                    <div className="mt-3 flex gap-2">
+                      <Button size="sm" variant="outline">
+                        View Details
+                      </Button>
+                      <Button size="sm">
+                        Take Action
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -39,7 +39,15 @@ import {
   Heart,
   Share2,
   Zap,
-  Award
+  Award,
+  Bell,
+  MessageCircle,
+  Video,
+  MoreVertical,
+  Paperclip,
+  Smile,
+  X,
+  GraduationCap
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +61,9 @@ const StudentPortal = () => {
   const [showCommunication, setShowCommunication] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [chatMessage, setChatMessage] = useState("");
 
   // Student opportunities data
   const studentOpportunities = [
@@ -142,6 +153,102 @@ const StudentPortal = () => {
 
   // Sample user name for header - this could come from auth context
   const userName = "Alex Johnson";
+
+  // Student conversation data
+  const studentConversations = [
+    {
+      id: 1,
+      type: 'tpo',
+      name: "Dr. Smith (TPO)",
+      avatar: "DS",
+      lastMessage: "Your interview with TechCorp is scheduled for tomorrow",
+      lastMessageTime: "10 min ago",
+      unread: 1,
+      isOnline: true,
+      status: "Training & Placement Officer",
+      messages: [
+        { id: 1, sender: "Dr. Smith", message: "Hi Alex, I have good news about your TechCorp application", timestamp: "2:30 PM", isMe: false },
+        { id: 2, sender: "Me", message: "That's exciting! What's the update?", timestamp: "2:32 PM", isMe: true },
+        { id: 3, sender: "Dr. Smith", message: "Your interview with TechCorp is scheduled for tomorrow", timestamp: "2:35 PM", isMe: false }
+      ]
+    },
+    {
+      id: 2,
+      type: 'mentor',
+      name: "Sarah Chen (Mentor)",
+      avatar: "SC",
+      lastMessage: "Great progress on your React project!",
+      lastMessageTime: "30 min ago",
+      unread: 0,
+      isOnline: true,
+      status: "Senior Software Engineer at Google",
+      messages: [
+        { id: 1, sender: "Sarah Chen", message: "How's your React project coming along?", timestamp: "1:00 PM", isMe: false },
+        { id: 2, sender: "Me", message: "Making good progress! Just implemented the routing", timestamp: "1:15 PM", isMe: true },
+        { id: 3, sender: "Sarah Chen", message: "Great progress on your React project!", timestamp: "1:30 PM", isMe: false }
+      ]
+    },
+    {
+      id: 3,
+      type: 'peer',
+      name: "Priya Sharma",
+      avatar: "PS",
+      lastMessage: "Want to team up for the hackathon?",
+      lastMessageTime: "1 hour ago",
+      unread: 2,
+      isOnline: false,
+      status: "4th Year IT Student",
+      messages: [
+        { id: 1, sender: "Priya Sharma", message: "Hey! Are you participating in Smart India Hackathon?", timestamp: "12:00 PM", isMe: false },
+        { id: 2, sender: "Me", message: "Yes! I'm looking for team members", timestamp: "12:15 PM", isMe: true },
+        { id: 3, sender: "Priya Sharma", message: "Want to team up for the hackathon?", timestamp: "12:30 PM", isMe: false }
+      ]
+    }
+  ];
+
+  // Student notifications data
+  const studentNotifications = [
+    {
+      id: 1,
+      type: "interview",
+      title: "Interview Confirmation",
+      message: "Your interview with TechCorp Solutions is confirmed for tomorrow at 2 PM",
+      timestamp: "30 min ago",
+      isRead: false,
+      priority: "high",
+      actionRequired: true
+    },
+    {
+      id: 2,
+      type: "application",
+      title: "Application Status Update",
+      message: "Your application for ML Research Intern at DataSense Labs is under review",
+      timestamp: "2 hours ago",
+      isRead: false,
+      priority: "medium",
+      actionRequired: false
+    },
+    {
+      id: 3,
+      type: "opportunity",
+      title: "New Opportunity Match",
+      message: "New internship opportunity matches your profile: Blockchain Developer Intern",
+      timestamp: "5 hours ago",
+      isRead: true,
+      priority: "medium",
+      actionRequired: false
+    }
+  ];
+
+  const handleSendMessage = () => {
+    if (!chatMessage.trim() || !selectedChat) return;
+    
+    setChatMessage("");
+    toast({
+      title: "Message Sent",
+      description: `Message sent to ${selectedChat.name}`,
+    });
+  };
 
   // Check user role for privacy controls
   const isTPOUser = userProfile?.role === 'tpo';
@@ -452,14 +559,32 @@ const StudentPortal = () => {
                 <Star className="w-4 h-4 mr-1" />
                 Premium Student
               </Badge>
+              
+              {/* Communication Button */}
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => setShowCommunication(true)}
+                className="relative"
               >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Communicate
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Communication
               </Button>
+              
+              {/* Notifications Button */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowNotifications(true)}
+                className="relative"
+              >
+                <Bell className="w-4 h-4 mr-2" />
+                Notifications
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  3
+                </Badge>
+              </Button>
+              
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -1389,13 +1514,386 @@ const StudentPortal = () => {
         </Dialog>
       )}
 
-      {/* Communication Modal */}
-      {showCommunication && (
-        <Communication 
-          onClose={() => setShowCommunication(false)}
-          userRole="student"
-        />
-      )}
+      {/* Communication Dialog */}
+      <Dialog open={showCommunication} onOpenChange={setShowCommunication}>
+        <DialogContent className="max-w-7xl h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" />
+              Communication Center
+            </DialogTitle>
+            <DialogDescription>
+              Chat with employees (mentors) and TPO officers for guidance
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 flex-1 min-h-0 overflow-hidden">
+            {/* Employees Section (Left Side) */}
+            <Card className="lg:col-span-1 flex flex-col h-full min-h-0 overflow-hidden">
+              <CardHeader className="pb-2 bg-gradient-to-r from-green-50 to-green-100 border-b flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-green-600" />
+                    Employees
+                  </CardTitle>
+                  <Badge variant="outline" className="bg-green-100 text-green-800 text-xs">
+                    {studentConversations.filter(c => c.type === 'mentor').length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <div className="h-full overflow-y-auto p-1" style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#86efac #dcfce7'
+                }}>
+                  <div className="space-y-1">
+                    {studentConversations
+                      .filter(conversation => conversation.type === 'mentor')
+                      .map((conversation) => (
+                      <div
+                        key={conversation.id}
+                        onClick={() => setSelectedChat(conversation)}
+                        className={`flex items-center gap-2 p-2 hover:bg-green-50 cursor-pointer transition-all duration-200 border-l-3 rounded-r-md ${
+                          selectedChat?.id === conversation.id 
+                            ? 'bg-green-100 border-l-green-500 shadow-sm' 
+                            : 'border-l-transparent hover:border-l-green-300'
+                        }`}
+                      >
+                        <div className="relative flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-semibold shadow-sm">
+                            {conversation.avatar}
+                          </div>
+                          {conversation.isOnline && (
+                            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-xs truncate">{conversation.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs font-medium text-green-600">Mentor</span>
+                            {conversation.unread > 0 && (
+                              <Badge variant="destructive" className="h-3 w-3 p-0 flex items-center justify-center text-xs">
+                                {conversation.unread}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {studentConversations.filter(c => c.type === 'mentor').length === 0 && (
+                      <div className="text-center py-4 text-muted-foreground">
+                        <Briefcase className="w-5 h-5 mx-auto mb-2 opacity-50" />
+                        <p className="text-xs">No mentors</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* TPO Officers Section (Right Side) */}
+            <Card className="lg:col-span-1 flex flex-col h-full min-h-0 overflow-hidden">
+              <CardHeader className="pb-2 bg-gradient-to-r from-purple-50 to-purple-100 border-b flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-purple-600" />
+                    TPO Officers
+                  </CardTitle>
+                  <Badge variant="outline" className="bg-purple-100 text-purple-800 text-xs">
+                    {studentConversations.filter(c => c.type === 'tpo').length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <div className="h-full overflow-y-auto p-1" style={{
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#c084fc #f3e8ff'
+                }}>
+                  <div className="space-y-1">
+                    {studentConversations
+                      .filter(conversation => conversation.type === 'tpo')
+                      .map((conversation) => (
+                      <div
+                        key={conversation.id}
+                        onClick={() => setSelectedChat(conversation)}
+                        className={`flex items-center gap-2 p-2 hover:bg-purple-50 cursor-pointer transition-all duration-200 border-l-3 rounded-r-md ${
+                          selectedChat?.id === conversation.id 
+                            ? 'bg-purple-100 border-l-purple-500 shadow-sm' 
+                            : 'border-l-transparent hover:border-l-purple-300'
+                        }`}
+                      >
+                        <div className="relative flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-semibold shadow-sm">
+                            {conversation.avatar}
+                          </div>
+                          {conversation.isOnline && (
+                            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-white"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-xs truncate">{conversation.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs font-medium text-purple-600">TPO Officer</span>
+                            {conversation.unread > 0 && (
+                              <Badge variant="destructive" className="h-3 w-3 p-0 flex items-center justify-center text-xs">
+                                {conversation.unread}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {studentConversations.filter(c => c.type === 'tpo').length === 0 && (
+                      <div className="text-center py-4 text-muted-foreground">
+                        <GraduationCap className="w-5 h-5 mx-auto mb-2 opacity-50" />
+                        <p className="text-xs">No TPO officers</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Chat Window */}
+            <Card className="lg:col-span-2 flex flex-col shadow-lg h-full min-h-0 overflow-hidden">
+              {selectedChat ? (
+                <>
+                  {/* Enhanced Chat Header */}
+                  <CardHeader className={`pb-3 border-b ${
+                    selectedChat.type === 'tpo' ? 'bg-purple-50' :
+                    selectedChat.type === 'mentor' ? 'bg-green-50' : 'bg-blue-50'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <div className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold shadow-md ${
+                            selectedChat.type === 'tpo' 
+                              ? 'bg-purple-100 text-purple-600' 
+                              : selectedChat.type === 'mentor'
+                              ? 'bg-green-100 text-green-600'
+                              : 'bg-blue-100 text-blue-600'
+                          }`}>
+                            {selectedChat.avatar}
+                          </div>
+                          {selectedChat.isOnline && (
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white"></div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-xl">{selectedChat.name}</h3>
+                          <p className="text-sm text-muted-foreground font-medium">{selectedChat.status}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className={`w-2 h-2 rounded-full ${selectedChat.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                            <span className="text-xs font-medium">
+                              {selectedChat.isOnline ? 'Online now' : 'Offline'}
+                            </span>
+                            <Badge variant="outline" className={`text-xs ml-2 ${
+                              selectedChat.type === 'tpo' ? 'bg-purple-100 text-purple-800' :
+                              selectedChat.type === 'mentor' ? 'bg-green-100 text-green-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {selectedChat.type === 'tpo' ? 'TPO Officer' : 
+                               selectedChat.type === 'mentor' ? 'Mentor' : 'Student'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" className="hover:bg-blue-50">
+                          <Phone className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" className="hover:bg-blue-50">
+                          <Video className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" className="hover:bg-blue-50">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  {/* Enhanced Messages */}
+                  <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+                    {selectedChat.messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.isMe ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-[75%] ${
+                          message.isMe 
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+                            : 'bg-white text-gray-900 shadow-md border border-gray-200'
+                        } rounded-2xl px-5 py-3 transform transition-all duration-200 hover:scale-[1.02]`}>
+                          <p className="text-sm leading-relaxed">{message.message}</p>
+                          <p className={`text-xs mt-2 ${
+                            message.isMe ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {message.timestamp}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+
+                  {/* Enhanced Message Input */}
+                  <div className="p-6 border-t bg-white">
+                    <div className="flex items-center gap-3">
+                      <Button variant="outline" size="sm" className="hover:bg-gray-50 rounded-full">
+                        <Paperclip className="w-4 h-4" />
+                      </Button>
+                      <div className="flex-1 relative">
+                        <Input
+                          placeholder={`Message ${selectedChat.name}...`}
+                          value={chatMessage}
+                          onChange={(e) => setChatMessage(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                          className="pr-12 py-4 rounded-full border-2 focus:border-blue-400 shadow-sm text-base"
+                        />
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-gray-100 rounded-full"
+                        >
+                          <Smile className="w-5 h-5" />
+                        </Button>
+                      </div>
+                      <Button 
+                        onClick={handleSendMessage}
+                        disabled={!chatMessage.trim()}
+                        className={`px-8 py-4 rounded-full font-semibold text-base shadow-lg ${
+                          selectedChat.type === 'tpo' ? 'bg-purple-500 hover:bg-purple-600' :
+                          selectedChat.type === 'mentor' ? 'bg-green-500 hover:bg-green-600' :
+                          'bg-blue-500 hover:bg-blue-600'
+                        } text-white disabled:opacity-50 transform transition-all duration-200 hover:scale-105`}
+                      >
+                        <Send className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <CardContent className="flex-1 flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <MessageCircle className="w-20 h-20 mx-auto mb-6 opacity-30" />
+                    <p className="text-2xl font-semibold mb-3">Start a conversation</p>
+                    <p className="text-lg mb-6">Choose someone from the list to begin chatting</p>
+                    <div className="flex items-center justify-center gap-8">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                        <span className="text-sm font-medium">TPO Officers</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Mentors</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Students</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent className="max-w-2xl h-[70vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Notifications
+            </DialogTitle>
+            <DialogDescription>
+              Stay updated with your academic and placement activities
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="px-3">
+                {studentNotifications.length} Total
+              </Badge>
+              <Badge variant="destructive" className="px-3">
+                {studentNotifications.filter(n => !n.isRead).length} Unread
+              </Badge>
+            </div>
+            <Button variant="outline" size="sm">
+              Mark All as Read
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-3">
+            {studentNotifications.map((notification) => (
+              <Card key={notification.id} className={`${!notification.isRead ? 'bg-blue-50 border-blue-200' : ''} hover:shadow-sm transition-all`}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          notification.type === 'application' ? 'bg-blue-100 text-blue-600' :
+                          notification.type === 'interview' ? 'bg-green-100 text-green-600' :
+                          notification.type === 'opportunity' ? 'bg-purple-100 text-purple-600' :
+                          'bg-orange-100 text-orange-600'
+                        }`}>
+                          {notification.type === 'application' ? '📄' :
+                           notification.type === 'interview' ? '🎤' :
+                           notification.type === 'opportunity' ? '💼' :
+                           '🎓'}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm">{notification.title}</h4>
+                          <p className="text-xs text-muted-foreground">{notification.message}</p>
+                        </div>
+                        {!notification.isRead && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">{notification.timestamp}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={
+                            notification.priority === 'high' ? 'destructive' :
+                            notification.priority === 'medium' ? 'default' :
+                            'secondary'
+                          } className="text-xs">
+                            {notification.priority}
+                          </Badge>
+                          {notification.actionRequired && (
+                            <Badge variant="outline" className="text-xs">
+                              Action Required
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {notification.actionRequired && (
+                    <div className="mt-3 flex gap-2">
+                      <Button size="sm" variant="outline">
+                        View Details
+                      </Button>
+                      <Button size="sm">
+                        Take Action
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

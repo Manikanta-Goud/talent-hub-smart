@@ -265,7 +265,7 @@ const LandingPage = () => {
               {/* Secondary portals - show other portals as secondary options (hide for TPO) */}
               {userRole !== 'tpo' && (
                 <div className="flex gap-2">
-                  {userRole !== 'student' && (
+                  {userRole !== 'student' && userRole !== 'employee' && (
                     <Button
                       variant="outline"
                       size="lg"
