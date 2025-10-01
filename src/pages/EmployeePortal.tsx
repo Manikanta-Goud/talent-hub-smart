@@ -602,7 +602,7 @@ const EmployeePortal = () => {
               <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                 <TabsTrigger value="mentees">My Mentees</TabsTrigger>
-                <TabsTrigger value="students">Student Portal</TabsTrigger>
+                <TabsTrigger value="students">Opportunities</TabsTrigger>
                 <TabsTrigger value="colleagues">Colleagues</TabsTrigger>
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>

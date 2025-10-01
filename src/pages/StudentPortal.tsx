@@ -34,7 +34,12 @@ import {
   Phone,
   Mail,
   Filter,
-  Briefcase
+  Briefcase,
+  DollarSign,
+  Heart,
+  Share2,
+  Zap,
+  Award
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +53,92 @@ const StudentPortal = () => {
   const [showCommunication, setShowCommunication] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Student opportunities data
+  const studentOpportunities = [
+    {
+      id: 1,
+      title: "Software Development Intern",
+      company: "TechCorp Solutions",
+      location: "Bangalore",
+      duration: "6 months",
+      stipend: "₹25,000/month",
+      description: "Join our dynamic team to build cutting-edge web applications.",
+      skills: ["React", "Node.js", "JavaScript"],
+      type: "internship",
+      deadline: "2024-02-15",
+      applicants: 45,
+      featured: true
+    },
+    {
+      id: 2,
+      title: "ML Research Intern",
+      company: "DataSense Labs",
+      location: "Hyderabad",
+      duration: "4 months", 
+      stipend: "₹30,000/month",
+      description: "Research and develop innovative ML algorithms.",
+      skills: ["Python", "Machine Learning", "TensorFlow"],
+      type: "internship",
+      deadline: "2024-02-20",
+      applicants: 32,
+      featured: false
+    },
+    {
+      id: 3,
+      title: "Data Science Internship",
+      company: "Analytics Pro",
+      location: "Chennai",
+      duration: "5 months",
+      stipend: "₹28,000/month", 
+      description: "Work on real-world data science projects with experienced mentors.",
+      skills: ["Python", "R", "SQL", "Tableau"],
+      type: "internship",
+      deadline: "2024-02-25",
+      applicants: 28,
+      featured: false
+    },
+    {
+      id: 4,
+      title: "Smart India Hackathon 2024",
+      company: "Government of India",
+      location: "Multiple Cities",
+      duration: "48 hours",
+      stipend: "₹1,00,000 prize",
+      description: "Nation's biggest hackathon for innovative solutions.",
+      skills: ["Innovation", "Problem Solving", "Technology"],
+      type: "hackathon",
+      deadline: "2024-03-01",
+      applicants: 150,
+      featured: true
+    },
+    {
+      id: 5,
+      title: "Google Summer of Code",
+      company: "Google",
+      location: "Remote",
+      duration: "3 months",
+      stipend: "$6,000",
+      description: "Contribute to open source projects mentored by Google.",
+      skills: ["Open Source", "Programming", "Git"],
+      type: "competition",
+      deadline: "2024-04-02",
+      applicants: 89,
+      featured: true
+    }
+  ];
+
+  const [filteredStudentOpportunities, setFilteredStudentOpportunities] = useState(studentOpportunities);
+  const [selectedFilter, setSelectedFilter] = useState('all');
+
+  const filterOpportunities = (type: string) => {
+    setSelectedFilter(type);
+    if (type === 'all') {
+      setFilteredStudentOpportunities(studentOpportunities);
+    } else {
+      setFilteredStudentOpportunities(studentOpportunities.filter(opp => opp.type === type));
+    }
+  };
 
   // Sample user name for header - this could come from auth context
   const userName = "Alex Johnson";
@@ -380,10 +471,14 @@ const StudentPortal = () => {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="opportunities" className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4" />
+              Opportunities
             </TabsTrigger>
             <TabsTrigger value="friends" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -505,6 +600,213 @@ const StudentPortal = () => {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Opportunities Tab */}
+          <TabsContent value="opportunities" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight">Career Opportunities</h2>
+                <p className="text-muted-foreground">
+                  Discover internships, hackathons, and competitions to boost your career
+                </p>
+              </div>
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Filter className="w-4 h-4 mr-2" />
+                Filter Opportunities
+              </Button>
+            </div>
+
+            {/* Filter Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => filterOpportunities('all')}
+                className="rounded-full"
+              >
+                All Opportunities
+              </Button>
+              <Button
+                variant={selectedFilter === 'internship' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => filterOpportunities('internship')}
+                className="rounded-full"
+              >
+                <Briefcase className="w-4 h-4 mr-1" />
+                Internships
+              </Button>
+              <Button
+                variant={selectedFilter === 'hackathon' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => filterOpportunities('hackathon')}
+                className="rounded-full"
+              >
+                <Zap className="w-4 h-4 mr-1" />
+                Hackathons
+              </Button>
+              <Button
+                variant={selectedFilter === 'competition' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => filterOpportunities('competition')}
+                className="rounded-full"
+              >
+                <Award className="w-4 h-4 mr-1" />
+                Competitions
+              </Button>
+            </div>
+
+            {/* Featured Opportunities */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">🌟 Featured Opportunities</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                {filteredStudentOpportunities.filter(opp => opp.featured).map((opportunity) => (
+                  <Card key={opportunity.id} className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 hover:shadow-lg transition-all">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Briefcase className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-lg">{opportunity.title}</h4>
+                            <p className="text-blue-600 font-medium">{opportunity.company}</p>
+                          </div>
+                        </div>
+                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                          Featured
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-gray-600 mb-4">{opportunity.description}</p>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{opportunity.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{opportunity.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-600">{opportunity.stipend}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{opportunity.applicants} applicants</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {opportunity.skills.slice(0, 3).map((skill, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                        {opportunity.skills.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{opportunity.skills.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
+                          Apply Now
+                        </Button>
+                        <Button variant="outline" size="icon">
+                          <Heart className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="icon">
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* All Opportunities */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">All Opportunities</h3>
+              <div className="grid gap-4">
+                {filteredStudentOpportunities.map((opportunity) => (
+                  <Card key={opportunity.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            opportunity.type === 'internship' ? 'bg-blue-100' :
+                            opportunity.type === 'hackathon' ? 'bg-purple-100' : 'bg-yellow-100'
+                          }`}>
+                            <Briefcase className={`w-5 h-5 ${
+                              opportunity.type === 'internship' ? 'text-blue-600' :
+                              opportunity.type === 'hackathon' ? 'text-purple-600' : 'text-yellow-600'
+                            }`} />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-lg">{opportunity.title}</h4>
+                            <p className="text-gray-600">{opportunity.company}</p>
+                          </div>
+                        </div>
+                        <Badge variant={
+                          opportunity.type === 'internship' ? 'default' :
+                          opportunity.type === 'hackathon' ? 'secondary' : 'outline'
+                        }>
+                          {opportunity.type.charAt(0).toUpperCase() + opportunity.type.slice(1)}
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-gray-600 mb-4">{opportunity.description}</p>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{opportunity.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{opportunity.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-600">{opportunity.stipend}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{opportunity.applicants} applicants</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {opportunity.skills.map((skill, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">
+                          Deadline: {new Date(opportunity.deadline).toLocaleDateString()}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                            Apply Now
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Heart className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </TabsContent>
 
