@@ -609,7 +609,7 @@ const StudentPortal = () => {
               <Users className="w-4 h-4" />
               Friends
             </TabsTrigger>
-            <TabsTrigger value="employee-portal" className="flex items-center gap-2">
+            <TabsTrigger value="mentors" className="flex items-center gap-2">
               <Target className="w-4 h-4" />
               Find Mentors
             </TabsTrigger>
@@ -1095,9 +1095,8 @@ const StudentPortal = () => {
             </div>
           </TabsContent>
 
-          {/* Opportunities Tab */}
-          {/* Employee Portal Tab - For Students to view employees */}
-          <TabsContent value="employee-portal">
+          {/* Find Mentors Tab - For Students to view employees */}
+          <TabsContent value="mentors">
             <div className="space-y-6">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-foreground mb-4 flex items-center justify-center gap-2">

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Communication from "@/components/Communication";
+import AIAssistant from "@/components/AIAssistant";
 import { 
   ArrowLeft, 
   Briefcase, 
@@ -2179,6 +2180,9 @@ const EmployeePortal = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* AI Assistant */}
+      <AIAssistant />
     </div>
   );
 };
